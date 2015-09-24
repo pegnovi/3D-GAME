@@ -73,7 +73,7 @@ var CommuTool = {
 	
 	//Create a single ConnectionObj for a groupmate
 	createConnectionObj: function(peerID, hasOwnDataChannel) {
-		this.conObjs[peerID] = ConnectionObj.create(this.commandFunction, this.socketInterface);
+		this.conObjs[peerID] = ConnectionObj.create(this.commandFunctions, this.socketInterface);
 		
 		if(hasOwnDataChannel == true) {
 			this.conObjs[peerID].makeOwnDataChannel(this.commandFunctions);
