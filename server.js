@@ -1,159 +1,290 @@
-#!/bin/env node
-//  OpenShift sample Node application
 var express = require('express');
-var fs      = require('fs');
+var socket = require('socket.io');
+var http = require('http');
+var path = require('path');
+var favicon = require('serve-favicon');
+var logger = require('morgan');
+var cookieParser = require('cookie-parser');
+var bodyParser = require('body-parser');
+
+var routes = require('./routes/index');
+var users = require('./routes/users');
+
+var app = express();
+
+// view engine setup
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
+
+// uncomment after placing your favicon in /public
+//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+app.use(logger('dev'));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.use('/', routes);
+app.use('/users', users);
+
+// catch 404 and forward to error handler
+app.use(function(req, res, next) {
+  var err = new Error('Not Found');
+  err.status = 404;
+  next(err);
+});
+
+// error handlers
+
+// development error handler
+// will print stacktrace
+if (app.get('env') === 'development') {
+  app.use(function(err, req, res, next) {
+    res.status(err.status || 500);
+    res.render('error', {
+      message: err.message,
+      error: err
+    });
+  });
+}
+
+// production error handler
+// no stacktraces leaked to user
+app.use(function(err, req, res, next) {
+  res.status(err.status || 500);
+  res.render('error', {
+    message: err.message,
+    error: {}
+  });
+});
 
 
-/**
- *  Define the sample application.
- */
-var SampleApp = function() {
-
-    //  Scope.
-    var self = this;
 
 
-    /*  ================================================================  */
-    /*  Helper functions.                                                 */
-    /*  ================================================================  */
-
-    /**
-     *  Set up server IP address and port # using env variables/defaults.
-     */
-    self.setupVariables = function() {
-        //  Set the environment variables we need.
-        self.ipaddress = process.env.OPENSHIFT_NODEJS_IP;
-        self.port      = process.env.OPENSHIFT_NODEJS_PORT || 8080;
-
-        if (typeof self.ipaddress === "undefined") {
-            //  Log errors on OpenShift but continue w/ 127.0.0.1 - this
-            //  allows us to run/test the app locally.
-            console.warn('No OPENSHIFT_NODEJS_IP var, using 127.0.0.1');
-            self.ipaddress = "127.0.0.1";
-        };
-    };
+var server = http.createServer(app);
+//server.listen(3000); //use this if running locally
+//server.listen(80); //use this if uploading to nodejitsu
 
 
-    /**
-     *  Populate the cache.
-     */
-    self.populateCache = function() {
-        if (typeof self.zcache === "undefined") {
-            self.zcache = { 'index.html': '' };
+//=====================
+//===socket.io stuff===
+//=====================
+socket = socket.listen(server);
+
+server.listen(process.env.OPENSHIFT_NODEJS_PORT, process.env.OPENSHIFT_NODEJS_IP); //use this if deploying to openshift
+
+//Represents a group of clients in the same chatroom
+var groups = {}; //roomID : list of client ids
+
+socket.on("connection", function(client) {
+	console.log("client connected via socket!!!");
+	
+	console.log("client id = " + client.id);
+    client.name = "Unknown";
+    client.locked = true;
+     
+    client.on("createid", function() {
+		console.log("SERVER CREATE ROOM ID!!!");
+        if(client.room) {
+            client.emit("createid", JSON.stringify({
+                id: client.room,
+            }));
+            return;
+        }
+        client.room = "";
+
+		//Ensure uniqueness of UUID
+        var UUID = getUUID();
+        while(groups[UUID]) {
+            UUID = getUUID();
         }
 
-        //  Local cache for static content.
-        self.zcache['index.html'] = fs.readFileSync('./index.html');
-    };
+        client.room = UUID;
+        groups[UUID] = [];
+		groups[UUID].push(client);
+        client.name = "Host";
 
+        client.emit("createid", JSON.stringify({
+            id: UUID,
+        }));
+    });
 
-    /**
-     *  Retrieve entry (content) from cache.
-     *  @param {string} key  Key identifying content to retrieve from cache.
-     */
-    self.cache_get = function(key) { return self.zcache[key]; };
+    client.on("setname", function(data) {
+        data = JSON.parse(data);
+        var result = false;
+        var message = "";
 
-
-    /**
-     *  terminator === the termination handler
-     *  Terminate server on receipt of the specified signal.
-     *  @param {string} sig  Signal to terminate on.
-     */
-    self.terminator = function(sig){
-        if (typeof sig === "string") {
-           console.log('%s: Received %s - terminating sample app ...',
-                       Date(Date.now()), sig);
-           process.exit(1);
+        if(data.name.length < 3) {
+            message = "Name must be at least 3 characters long.";
+        } else if (data.name.length > 20) {
+        	message = "Name cannot be more than 20 characters long."
+        } else {
+            client.name = data.name;
+            result = true;
+            message = "Name is good."
         }
-        console.log('%s: Node server stopped.', Date(Date.now()) );
-    };
 
+        client.emit("setname", JSON.stringify({
+			result: result,
+            error: message 
+        }));
+    });
 
-    /**
-     *  Setup termination handlers (for exit and a list of signals).
-     */
-    self.setupTerminationHandlers = function(){
-        //  Process on exit and signals.
-        process.on('exit', function() { self.terminator(); });
+    client.on("togglelock", function() {
+        if(client.room) {
+            if(client.locked) {
+                client.locked = false;
+            } else
+                client.locked = true;
 
-        // Removed 'SIGPIPE' from the list - bugz 852598.
-        ['SIGHUP', 'SIGINT', 'SIGQUIT', 'SIGILL', 'SIGTRAP', 'SIGABRT',
-         'SIGBUS', 'SIGFPE', 'SIGUSR1', 'SIGSEGV', 'SIGUSR2', 'SIGTERM'
-        ].forEach(function(element, index, array) {
-            process.on(element, function() { self.terminator(element); });
-        });
-    };
-
-
-    /*  ================================================================  */
-    /*  App server functions (main app logic here).                       */
-    /*  ================================================================  */
-
-    /**
-     *  Create the routing table entries + handlers for the application.
-     */
-    self.createRoutes = function() {
-        self.routes = { };
-
-        self.routes['/asciimo'] = function(req, res) {
-            var link = "http://i.imgur.com/kmbjB.png";
-            res.send("<html><body><img src='" + link + "'></body></html>");
-        };
-
-        self.routes['/'] = function(req, res) {
-            res.setHeader('Content-Type', 'text/html');
-            res.send(self.cache_get('index.html') );
-        };
-    };
-
-
-    /**
-     *  Initialize the server (express) and create the routes and register
-     *  the handlers.
-     */
-    self.initializeServer = function() {
-        self.createRoutes();
-        self.app = express.createServer();
-
-        //  Add handlers for the app (from the routes).
-        for (var r in self.routes) {
-            self.app.get(r, self.routes[r]);
+            client.emit("toggledlock");
         }
-    };
+    });
+
+    client.on("requestCanvasData", function() {
+    	socket.to(groups[client.room][0].id).emit("getCanvasData", JSON.stringify({
+			requesterID: client.id
+		}));
+    });
+
+	//&&!!&&
+	client.on("giveCanvasData", function(data) {
+		console.log("giveCanvasData");
+		data = JSON.parse(data);
+		socket.to(data.peerID).emit("HereIsCanvasData", JSON.stringify({
+			image: data.image,
+		}));
+	});
+	
+    client.on("doesroomexist", function(data) {
+        data = JSON.parse(data);
+		
+        var result = groups[data.room] ? true: false;
+		if(result) {
+			
+			//group exists
+			//send number of ppl there and their clientIDs
+			var otherClientsIDs = [];
+			console.log("Other Client IDs");
+			for(var i=0; i<groups[data.room].length; i++) {
+				otherClientsIDs.push(groups[data.room][i].id);
+				console.log(groups[data.room][i].id);
+			}
+			
+			client.emit("roomExists", JSON.stringify({
+				groupmatesIDs: otherClientsIDs
+			}));
+			
+			//add to group
+			var found = false;
+			if(groups[data.room] != undefined) {
+				for(var i=0; i<groups[data.room].length; i++) {
+					if(groups[data.room][i].id == client.id) {
+						found = true;
+					}
+				}
+				if(!found) {
+					console.log("added " + client.id + " to group");
+					groups[data.room].push(client);
+					client.room = data.room;
+				}
+				
+				console.log("GROUP SO FAR:");
+				for(var i=0; i<groups[data.room].length; i++) {
+					console.log(groups[data.room][i].id);
+				}
+				console.log("+++++++++++++++++++++++++++");
+			}
+		
+		}
+		else {
+			client.emit("roomDoesNotExist");
+		}
+		/*
+        socket.emit("doesroomexist", JSON.stringify({
+            result: hosts[data.room] ? true : false,
+        }));
+		*/
+    });
+	client.on("signalOffer", function(data) {
+		data = JSON.parse(data);
+		//console.log("!!!IN SIGNAL OFFER with target id = " + data.targetID);
+		//console.log("the offer is = " + data.clientOffer);
+	
+		socket.to(data.targetID).emit("offerFromClient", JSON.stringify({
+			offer: data.clientOffer,
+			offererID: client.id
+		}));
+		
+	});
+	
+	
+	client.on("signalAnswer", function(data) {
+		data = JSON.parse(data);
+		
+		//console.log("client room = " + client.room);
+		socket.to(data.targetID).emit("answerToOffer", JSON.stringify({
+			roomID: client.room,
+			answer: data.clientAnswer,
+			answererID: client.id,
+			answererName: data.clientName
+		}));
+		
+	});
+
+	client.on("iceCandidate", function(data) {
+		data = JSON.parse(data);
+		
+		console.log("ICE candidate from " + client.id);
+		console.log("For room " + data.room);
+		if(groups[data.room] != undefined) {
+			for(var i=0; i<groups[data.room].length; i++) {
+				if(groups[data.room][i].id != client.id) {
+					console.log("Sending ICE Candidate to " + groups[data.room][i].id);
+					socket.to(groups[data.room][i].id).emit("iceCandidateUpdate", JSON.stringify({
+						peerID: client.id,
+						iceCandidate: data.candidate
+					}));
+				}
+			}
+			console.log();
+		
+		}
+	});
+	
+    client.on("disconnect", function() {
+        if(client.room) {
+			console.log("deleting client " + client.id + " from group");
+
+			//delete client from group
+			var index = groups[client.room].indexOf(client);
+			groups[client.room].splice(index,1);
+			
+			//tell all other clients in the group to delete this client
+			for(var i=0; i<groups[client.room].length; i++) {
+				console.log("HERE with " + groups[client.room][i].id);
+				socket.to(groups[client.room][i].id).emit("deleteMember", JSON.stringify({
+					memberToDelete: client.id
+				}));
+			}
+			
+			if(groups[client.room].length == 0) {
+				console.log("group member count == 0 so deleting entire group");
+				delete groups[client.room];
+			}
+			delete client;
+        }
+    });
+	
+});
 
 
-    /**
-     *  Initializes the sample application.
-     */
-    self.initialize = function() {
-        self.setupVariables();
-        self.populateCache();
-        self.setupTerminationHandlers();
-
-        // Create the express server and routes.
-        self.initializeServer();
-    };
+function getUUID() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+        return v.toString(16);
+    });
+}
 
 
-    /**
-     *  Start the server (starts up the sample application).
-     */
-    self.start = function() {
-        //  Start the app on the specific interface (and port).
-        self.app.listen(self.port, self.ipaddress, function() {
-            console.log('%s: Node server started on %s:%d ...',
-                        Date(Date.now() ), self.ipaddress, self.port);
-        });
-    };
-
-};   /*  Sample Application.  */
-
-
-
-/**
- *  main():  Main code.
- */
-var zapp = new SampleApp();
-zapp.initialize();
-zapp.start();
-
+module.exports = app;

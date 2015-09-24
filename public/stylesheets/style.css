@@ -1,0 +1,189 @@
+html, body {
+	padding: 0px;
+	margin: 0px;
+	height: 100%;
+	width: 100%;
+	font-family: futura-pt,"Helvetica Neue",Helvetica,Arial,"Lucida Grande",sans-serif;
+}
+
+.navbar-inverse {
+	padding: 0px;
+	border-color: #1b926c;
+	border-width: 0 0 1px;
+	margin: 0px;
+}
+
+.navbar-brand {
+	color: #FFF !important;
+	height: auto !important;
+}
+
+#nav-bar {
+	width: 40%;
+}
+
+#size-selector-div {
+	height: 30px;
+	width: 200px;
+	padding-top: 15px;
+}
+
+#color-selector {
+	height: 33px;
+}
+
+.float-right {
+	float: right;
+	margin-left: 10px;
+}
+
+.header {
+	color: #FFF;
+}
+
+.banner-content {
+	padding-top: 40px;
+	padding-bottom: 80px;
+}
+
+.input-group-custom {
+	background-color: #FFF;
+	padding: 5px;
+	border-radius: 3px;
+}
+
+.form-control-custom {
+	border-radius: 0px;
+	border: 0px;
+	box-shadow: none;
+}
+
+.form-control-custom:focus {
+	box-shadow: none;
+}
+
+.form-control-custom[readonly] {
+	background-color: #FFF;
+	cursor: default;
+}
+
+.btn-custom {
+	border-radius: 0px;
+	border: 0px;
+	padding: 5px;
+	padding-left: 20px;
+	padding-right: 20px;
+	border-radius: 3px !important;
+	border-bottom-left-radius: 3px !important;
+	border-top-left-radius: 3px !important;
+	color: #FFF;
+}
+
+.technologies {
+	padding-top: 30px;
+	padding-bottom: 30px;
+}
+
+.url-bar {
+	padding: 20px;
+}
+
+.center {
+	margin-left: auto;
+	margin-right: auto;
+	text-align: center;
+}
+
+.no-padding {
+	padding: 0px;
+}
+
+#chat-room {
+	height: 100%;
+	min-height: 100%;
+}
+
+#canvas-div {
+	height: 100%;
+	min-height: 100%;
+}
+
+#convo {
+	height: 300px;
+	width: 100%;
+	resize: none;
+	padding-left: 5px;
+	padding-right: 5px;
+}
+
+#send {
+	width: 13%;
+	margin-top: 0px;
+	color: #FFF;
+}
+
+#msg {
+	width: 83%;
+}
+
+#convo-header {
+	padding-left: 10px;
+	padding-top: 5px;
+	height: 30px;
+	border-top-right-radius: 10px 10px;
+	border-top-left-radius: 10px 10px;
+	color: #FFF;
+}
+
+#footer {
+	min-height: 30px;
+}
+
+.circle {
+	border-radius: 50%;
+	width: 100px;
+	height: 100px;
+}
+
+.home-circle {
+	border-radius: 50%;
+	font-size: 120px;
+	width: 200px;
+	height: 200px;
+	float: left;
+	margin-right: 20px;
+}
+
+.exclamation {
+	border-radius: 2px 2px;
+	width: 20px;
+	height: 20px;
+	padding-left: 8px;
+	float: left;
+	margin-right: 5px;
+}
+
+/* Colors*/
+.white {
+	background-color: #FFF;
+}
+
+.green {
+	background-color: #1E9E74;
+}
+
+.dark-green {
+	background-color: #1A8964;
+}
+
+.blue {
+	background-color: #45B7D1;
+}
+
+.gray {
+	background-color: #F0F1F3;
+}
+
+.dark {
+	background-color: #555;
+}

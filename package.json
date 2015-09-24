@@ -9,8 +9,8 @@
     "openshift"
   ],
   "author": {
-    "name": "OpenShift",
-    "email": "ramr@example.org",
+    "name": "pegnovi",
+    "email": "pegnovi@yahoo.com",
     "url": "http://www.openshift.com/"
   },
   "homepage": "http://www.openshift.com/",
@@ -25,7 +25,14 @@
   },
 
   "dependencies": {
-    "express": "~3.4.4"
+    "body-parser": "~1.13.1",
+    "cookie-parser": "~1.3.5",
+    "debug": "~2.2.0",
+    "ejs": "~2.3.2",
+    "express": "~4.13.0",
+    "morgan": "~1.6.1",
+    "serve-favicon": "~2.3.0",
+    "socket.io": "^1.3.6"
   },
   "devDependencies": {},
   "bundleDependencies": [],
