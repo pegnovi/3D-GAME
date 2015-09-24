@@ -59,18 +59,15 @@ app.use(function(err, req, res, next) {
 });
 
 
-
-
 var server = http.createServer(app);
-//server.listen(3000); //use this if running locally
-//server.listen(80); //use this if uploading to nodejitsu
-
 
 //=====================
 //===socket.io stuff===
 //=====================
 socket = socket.listen(server);
 
+//server.listen(3000); //use this if running locally
+//server.listen(80); //use this if uploading to nodejitsu
 server.listen(process.env.OPENSHIFT_NODEJS_PORT, process.env.OPENSHIFT_NODEJS_IP); //use this if deploying to openshift
 
 //Represents a group of clients in the same chatroom

@@ -15,7 +15,7 @@ var CommuTool = {
 		//   =>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>
 		self.commandFunctions = {};
 		self.commandFunctions["name"] = function(dataChannel, data) {
-			var theConObj = this.findConObj(dataChannel);
+			var theConObj = self.findConObj(dataChannel);
 			if(theConObj != null) {
 				theConObj.name = data.dataObj;
 				console.log("received name = " + theConObj.name);
@@ -26,7 +26,7 @@ var CommuTool = {
 		};
 
 		self.commandFunctions["chatMessage"] = function(dataChannel, data) {
-			var theConObj = this.findConObj(dataChannel);
+			var theConObj = self.findConObj(dataChannel);
 			if(theConObj != null) {
 				var convo = $("#convo");
 				convo.append(theConObj.name + ": " + data.dataObj + "\n");
