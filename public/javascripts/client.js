@@ -1,3 +1,4 @@
+
 $(document).ready(function() {
 
 	
@@ -5,10 +6,10 @@ $(document).ready(function() {
 	channelOpen = false;
 
 	//Sketchpad initialization
-	var canvas = document.getElementById('canvas');
-	var padContext = canvas.getContext('2d');
-	var sketchpad = new Sketchpad(padContext);
-	var drawingInterval = null;
+	canvas = document.getElementById('canvas');
+	padContext = canvas.getContext('2d');
+	sketchpad = new Sketchpad(padContext);
+	drawingInterval = null;
 
 	$('#size-selector').on('change', function(){
 		sketchpad.setWidth($('#size-selector').val());

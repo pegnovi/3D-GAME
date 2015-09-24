@@ -37,7 +37,7 @@ var CommuTool = {
 		};
 
 		self.commandFunctions["draw"] = function(dataChannel, data) {
-			var theConObj = this.findConObj(dataChannel);
+			var theConObj = self.findConObj(dataChannel);
 			if(theConObj != null) {
 				//??
 				sketchpad.drawFromArray(data.dataObj);
