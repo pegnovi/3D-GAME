@@ -74,7 +74,7 @@ var ConnectionObj = {
 		self.pc.ondatachannel = function(event) {
 			console.log("GOT A DATA CHANNEL!!!");
 			self.dataChannel = event.channel;
-			this.setChannelEvents(commandFunctions);
+			self.setChannelEvents(commandFunctions);
 		}
 		
 		return self;
