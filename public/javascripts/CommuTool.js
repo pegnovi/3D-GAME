@@ -31,7 +31,7 @@ var CommuTool = {
 				var convo = $("#convo");
 				convo.append(theConObj.name + ": " + data.dataObj + "\n");
 				convo.scrollTop(convo[0].scrollHeight);
-				//??
+				//?? globalized for now
 				convoHasChanged();
 			}
 		};
@@ -39,7 +39,7 @@ var CommuTool = {
 		self.commandFunctions["draw"] = function(dataChannel, data) {
 			var theConObj = self.findConObj(dataChannel);
 			if(theConObj != null) {
-				//??
+				//?? globalized for now
 				sketchpad.drawFromArray(data.dataObj);
 			}
 		}

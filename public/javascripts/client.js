@@ -253,7 +253,7 @@ $(document).ready(function() {
 			commuTool.sendToGroup("draw", array);
 	},30);
 
-	function convoHasChanged() {
+	convoHasChanged = function() {
 		var header = $("#convo-header");
 		if(header.hasClass("collapsed") && $(".exclamation").length == 0) {
 			header.prepend("<div class='exclamation dark-green'><i class='fa fa-exclamation fa-1x'></i></div>");
