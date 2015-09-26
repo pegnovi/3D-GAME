@@ -58,7 +58,7 @@ var ConnectionObj = {
 			if(event.candidate) {
 				console.log("Sending new ICE Candidate");
 				console.log(event.candidate);
-				self.socketInterface.emit("iceCandidate", JSON.stringify({
+				self.socketInterface.socket.emit("iceCandidate", JSON.stringify({
 					room: roomId, //(roomId is not defined)
 					candidate: event.candidate
 				}));
