@@ -73,10 +73,6 @@ server.listen(process.env.OPENSHIFT_NODEJS_PORT, process.env.OPENSHIFT_NODEJS_IP
 //Represents a group of clients in the same chatroom
 var groups = {}; //roomID : list of client ids
 
-var socketCommandFuncs = {};
-socketCommandFuncs["sendOffer"] = function(data) {
-
-};
 
 socket.on("connection", function(client) {
 	console.log("client connected via socket!!!");
@@ -85,11 +81,16 @@ socket.on("connection", function(client) {
     client.name = "Unknown";
     client.locked = true;
     
+	//send the client id
+	client.emit("id", JSON.stringify({
+		id: client.id,
+	}));
+	
 	//!!
 	client.on("re-route", function(data) {
 		var parsedData = JSON.parse(data);
 
-		socketCommandFuncs[parsedData.command](parsedData);
+		socket.to(parsedData.targetID).emit("re-route", data);
 
 	});
 

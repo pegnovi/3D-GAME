@@ -6,8 +6,6 @@ var CommuTool = {
 		var self = Object.create(this);
 			
 		self.socketInterface = socketInterface;
-		self.id = socketInterface.io.engine.id;
-		console.log("Your ID = " + self.id);
 		self.conObjs = {}; //clientID : connectionObj
 		
 		//Move this to client.js??
@@ -60,6 +58,28 @@ var CommuTool = {
 		//}
 		//   =>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>	
 
+		//   =>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>	
+		//{ =>=>=>=>=> Receive Functions =>=>=>=>=>
+		//   =>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>
+		self.recvFuncs = {};
+		self.recvFuncs["offerFromPeer"] = function(data) {
+			console.log(data.offer);
+			console.log("from client " + data.originatorID);
+			self.processReceivedOffer(data.originatorID, data.offer);
+		};
+		self.recvFuncs["answerFromPeer"] = function(data) {
+			self.processReceivedAnswer(data.originatorID, data.answer, data.peerName);
+			showNameForm();
+		};
+		
+		/*
+		self.recvFuncs[" <YOUR COMMAND> "] = function(data) {
+		};
+		*/
+		
+		self.socketInterface.setRecvFuncs(self.recvFuncs);
+		//}
+		//   =>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>
 		
 		return self;
 	},

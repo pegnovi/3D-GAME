@@ -62,6 +62,8 @@ var ConnectionObj = {
 					room: roomId, //(roomId is not defined)
 					candidate: event.candidate
 				}));
+				//????
+				//self.socketInterface.send(id, , "iceCandidate", {candidate: candidate});
 			}
 		}
 		self.pc.onnegotiationneeded = function () {
@@ -76,6 +78,11 @@ var ConnectionObj = {
 			self.dataChannel = event.channel;
 			self.setChannelEvents(commandFunctions);
 		}
+		
+		self.recvFuncs = {};
+		self.recvFuncs["id"] = function(data) {
+
+		};
 		
 		return self;
 	},
@@ -124,10 +131,14 @@ var ConnectionObj = {
 			ownPeerConnection.setLocalDescription(new SessionDescription(offer), 
 				function() {
 					//send the offer to a server to be forwarded to the friend you're calling
+					/*
 					self.socketInterface.emit("signalOffer", JSON.stringify({
 						targetID: peerID,
 						clientOffer: offer
 					}));
+					*/
+					self.socketInterface.send(id, peerID, "offerFromPeer", {offer: offer});
+					
 				}, error);
 		}, error);
 	},
@@ -141,8 +152,7 @@ var ConnectionObj = {
 		var ownPeerConnection = this.pc;
 		
 		ownPeerConnection.setRemoteDescription(new SessionDescription(offer), function() {
-			
-			
+				
 			self.createAnswer(offererID);
 			
 		}, error);
@@ -159,11 +169,14 @@ var ConnectionObj = {
 			
 				//https://github.com/ESTOS/strophe.jingle/issues/35
 				//send the answer to a server to be forwarded back to the caller
+				/*
 				self.socketInterface.emit("signalAnswer", JSON.stringify({
-					clientName: this.name,
+					clientName: self.name,
 					clientAnswer: answer,
 					targetID: offererID 
 				}));
+				*/
+				self.socketInterface.send(id, offererID, "answerFromPeer", {peerName: self.name, answer: answer});
 				
 				
 			}, error);

@@ -32,7 +32,7 @@ $(document).ready(function() {
 	
 	console.log("Room ID = " + roomId);
 	
-	var commuTool = CommuTool.create(socket /*, roomId*/);
+	var commuTool = CommuTool.create(socketInterface /*, roomId*/);
 	
 	if(roomId) {
 		showLoading();
@@ -47,6 +47,9 @@ $(document).ready(function() {
 	}
 
 	
+	socket.on("id", function(data){
+		id = data.id;
+	});
 	
 	socket.on("createid", function(data) {
 		console.log("CREATEID HERE");
@@ -129,6 +132,7 @@ $(document).ready(function() {
 	
 	//Receivor
 	//If receiving offer, the connectionObj created must wait for a datachannel from the new groupmate
+	/*
 	socket.on("offerFromClient", function(data) {
 		
 		data = JSON.parse(data);
@@ -148,6 +152,7 @@ $(document).ready(function() {
 		showNameForm();
 
 	});
+	*/
 	
 	socket.on("deleteMember", function(data) {
 		data = JSON.parse(data);

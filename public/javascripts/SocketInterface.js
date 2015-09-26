@@ -2,6 +2,7 @@ var SocketInterface = {
 	create: function() {
 		var self = Object.create(this);
 		self.socket = null;
+		self.recvFuncs = null;
 		return self;
 	},
 	
@@ -10,9 +11,12 @@ var SocketInterface = {
 		this.socket = socket;
 
 		//re-route socket messages to "receive" function
-		this.socket.on("message", function(data) {
+		this.socket.on("re-route", function(data) {
 			self.receive(JSON.parse(data));
 		});
+	},
+	setRecvFuncs: function(recvFuncs) {
+		self.recvFuncs = recvFuncs;
 	},
 	
 	//Message Format:
@@ -31,7 +35,7 @@ var SocketInterface = {
 
 	},
 
-	//data contains originatorID, targetID, command, other data
+	//data contains originatorID, command, other data
 	receive: function(data) {
 		
 	},
