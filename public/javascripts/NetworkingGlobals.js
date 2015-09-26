@@ -24,11 +24,9 @@ $(document).ready(function() {
 	console.log("connecting...");
 	
 	//socket = io.connect("p2pChatAndDraw.jit.su:80"); //use this if uploading to nodejitsu
-	socket = io.connect("http://nodejswebrtc-pegtest.rhcloud.com:8000/", {'forceNew':true});
-	//socket = io.connect("127.0.0.1:3000"); //use this if running locally
+	//socket = io.connect("http://nodejswebrtc-pegtest.rhcloud.com:8000/", {'forceNew':true});
+	socket = io.connect("127.0.0.1:3000"); //use this if running locally
 	
-	id = socket.io.engine.id;
-	console.log("Your ID = " + id);
 	socketInterface.setSocket(socket);
 	
 	console.log("connected!!!");

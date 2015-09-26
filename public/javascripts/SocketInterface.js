@@ -6,17 +6,19 @@ var SocketInterface = {
 		return self;
 	},
 	
-	setSocket: function(socket) {
-		var self = this;		
+	setSocket: function(socket) {		
 		this.socket = socket;
-
+	},
+	setRecvFuncs: function(recvFuncs) {
+		this.recvFuncs = recvFuncs;
+	},
+	//This must only be called once setSocket and setRecvFuncs has been called
+	setReRouteRecv: function() {
+		var self = this;
 		//re-route socket messages to "receive" function
 		this.socket.on("re-route", function(data) {
 			self.receive(JSON.parse(data));
 		});
-	},
-	setRecvFuncs: function(recvFuncs) {
-		self.recvFuncs = recvFuncs;
 	},
 	
 	//Message Format:
@@ -25,6 +27,8 @@ var SocketInterface = {
 	//command
 	//data
 	send: function(originatorID, targetID, command, data) {
+		
+		console.log("SENDING");
 		
 		//pack up and stringify IDs, command, and data
 		data["originatorID"] = originatorID;
@@ -37,7 +41,7 @@ var SocketInterface = {
 
 	//data contains originatorID, command, other data
 	receive: function(data) {
-		
+		this.recvFuncs[data.command](data);
 	},
 
 	

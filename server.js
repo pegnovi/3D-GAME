@@ -66,9 +66,9 @@ var server = http.createServer(app);
 //=====================
 socket = socket.listen(server);
 
-//server.listen(3000); //use this if running locally
+server.listen(3000); //use this if running locally
 //server.listen(80); //use this if uploading to nodejitsu
-server.listen(process.env.OPENSHIFT_NODEJS_PORT, process.env.OPENSHIFT_NODEJS_IP); //use this if deploying to openshift
+//server.listen(process.env.OPENSHIFT_NODEJS_PORT, process.env.OPENSHIFT_NODEJS_IP); //use this if deploying to openshift
 
 //Represents a group of clients in the same chatroom
 var groups = {}; //roomID : list of client ids
@@ -88,6 +88,7 @@ socket.on("connection", function(client) {
 	
 	//!!
 	client.on("re-route", function(data) {
+		console.log("RE-ROUTING");
 		var parsedData = JSON.parse(data);
 
 		socket.to(parsedData.targetID).emit("re-route", data);

@@ -137,6 +137,7 @@ var ConnectionObj = {
 						clientOffer: offer
 					}));
 					*/
+					console.log("SENDING OFFER");
 					self.socketInterface.send(id, peerID, "offerFromPeer", {offer: offer});
 					
 				}, error);
@@ -176,6 +177,7 @@ var ConnectionObj = {
 					targetID: offererID 
 				}));
 				*/
+				console.log("SENDING ANSWER");
 				self.socketInterface.send(id, offererID, "answerFromPeer", {peerName: self.name, answer: answer});
 				
 				

@@ -48,7 +48,9 @@ $(document).ready(function() {
 
 	
 	socket.on("id", function(data){
+		data = JSON.parse(data);
 		id = data.id;
+		console.log("Your ID = " + id);
 	});
 	
 	socket.on("createid", function(data) {
@@ -298,7 +300,7 @@ $(document).ready(function() {
 		$("#home").show();
 	}
 
-	function showNameForm() {
+	showNameForm = function() {
 		hide();
 		$("#name-form").show();
 		$("#name-input").focus();

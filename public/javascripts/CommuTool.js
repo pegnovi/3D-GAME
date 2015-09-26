@@ -63,11 +63,15 @@ var CommuTool = {
 		//   =>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>
 		self.recvFuncs = {};
 		self.recvFuncs["offerFromPeer"] = function(data) {
+			console.log("!!!OFFER RECEIVED");
 			console.log(data.offer);
-			console.log("from client " + data.originatorID);
+			console.log("Offer from peer: " + data.originatorID);
 			self.processReceivedOffer(data.originatorID, data.offer);
 		};
 		self.recvFuncs["answerFromPeer"] = function(data) {
+			console.log("!!!ANSWER RECEIVED");
+			console.log(data.answer);
+			console.log("Answer from peer: " + data.originatorID);
 			self.processReceivedAnswer(data.originatorID, data.answer, data.peerName);
 			showNameForm();
 		};
@@ -78,6 +82,7 @@ var CommuTool = {
 		*/
 		
 		self.socketInterface.setRecvFuncs(self.recvFuncs);
+		self.socketInterface.setReRouteRecv();
 		//}
 		//   =>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>
 		
@@ -124,8 +129,7 @@ var CommuTool = {
 	//{)))))))))) Receivor ((((((((((
 	//If receiving offer, the connectionObj created must wait for a datachannel from the new groupmate
 	processReceivedOffer: function(offererID, offer) {
-		console.log("OFFER RECEIVED!!!");
-		
+
 		//Create connectionObj for the offering peer
 		this.createConnectionObj(offererID, false);
 		
