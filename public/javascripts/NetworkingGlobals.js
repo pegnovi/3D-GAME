@@ -4,6 +4,7 @@ var RTCIceCandidate = null;
 
 var socket = null;
 var socketInterface = SocketInterface.create();
+var id = null;
 
 $(document).ready(function() {
 
@@ -26,6 +27,8 @@ $(document).ready(function() {
 	socket = io.connect("http://nodejswebrtc-pegtest.rhcloud.com:8000/", {'forceNew':true});
 	//socket = io.connect("127.0.0.1:3000"); //use this if running locally
 	
+	id = socket.io.engine.id;
+	console.log("Your ID = " + id);
 	socketInterface.setSocket(socket);
 	
 	console.log("connected!!!");
