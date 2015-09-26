@@ -6,6 +6,8 @@ var CommuTool = {
 		var self = Object.create(this);
 			
 		self.socketInterface = socketInterface;
+		self.id = socketInterface.io.engine.id;
+		console.log("Your ID = " + self.id);
 		self.conObjs = {}; //clientID : connectionObj
 		
 		//Move this to client.js??
