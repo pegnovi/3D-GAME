@@ -1,4 +1,4 @@
-
+//Communication Tool assuming Mesh Network between peers
 var CommuTool = {
 
 	//socket is some messaging interface
@@ -9,13 +9,12 @@ var CommuTool = {
 		self.conObjs = {}; //clientID : connectionObj
 		
 		//Move this to client.js??
-	
 		//   =>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>	
 		//{ =>=>=>=>=> Command Functions =>=>=>=>=>
 		//   =>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>
 		self.commandFunctions = {};
-		self.commandFunctions["name"] = function(dataChannel, data) {
-			var theConObj = self.findConObj(dataChannel);
+		self.commandFunctions["name"] = function(data) {
+			var theConObj = self.findConObj(data.dataChannel);
 			if(theConObj != null) {
 				theConObj.name = data.dataObj;
 				console.log("received name = " + theConObj.name);
@@ -25,8 +24,8 @@ var CommuTool = {
 			}
 		};
 
-		self.commandFunctions["chatMessage"] = function(dataChannel, data) {
-			var theConObj = self.findConObj(dataChannel);
+		self.commandFunctions["chatMessage"] = function(data) {
+			var theConObj = self.findConObj(data.dataChannel);
 			if(theConObj != null) {
 				var convo = $("#convo");
 				convo.append(theConObj.name + ": " + data.dataObj + "\n");
@@ -36,8 +35,8 @@ var CommuTool = {
 			}
 		};
 
-		self.commandFunctions["draw"] = function(dataChannel, data) {
-			var theConObj = self.findConObj(dataChannel);
+		self.commandFunctions["draw"] = function(data) {
+			var theConObj = self.findConObj(data.dataChannel);
 			if(theConObj != null) {
 				//?? globalized for now
 				sketchpad.drawFromArray(data.dataObj);
@@ -85,6 +84,15 @@ var CommuTool = {
 
 		//}
 		//   =>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>
+		
+		self.onIceCandidateHandler = function(candidate) {
+			for(var peerID in self.conObjs) {
+				if(self.conObjs.hasOwnProperty(peerID)) {
+					self.socketInterface.send("re-route", id, peerID, "iceCandidate", {candidate: candidate});
+				}
+			}
+		};
+		
 		
 		return self;
 	},

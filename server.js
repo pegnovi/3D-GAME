@@ -193,6 +193,7 @@ socket.on("connection", function(client) {
 				console.log(groups[data.room][i].id);
 			}
 			
+			//This is where it begins
 			client.emit("roomExists", JSON.stringify({
 				groupmatesIDs: otherClientsIDs
 			}));

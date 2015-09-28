@@ -1,12 +1,14 @@
 
 $(document).ready(function() {
 
+	//?!
 	var recvFuncs = {};
 	recvFuncs["id"] = function(data) {
 		id = data.id;
 		console.log("Your ID = " + id);
 	}
 	socketInterface.addRecvFuncs(recvFuncs);
+	//?!
 	
 	socketInterface.send("serverJob", "", "", "id", {});
 	
@@ -54,12 +56,6 @@ $(document).ready(function() {
 		socket.emit("createid");
 	}
 
-	
-	socket.on("id", function(data){
-		data = JSON.parse(data);
-		id = data.id;
-		console.log("Your ID = " + id);
-	});
 	
 	socket.on("createid", function(data) {
 		console.log("CREATEID HERE");

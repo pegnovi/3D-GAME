@@ -6,6 +6,10 @@ var ConnectionObj = {
 		self.socketInterface = socketInterface;
 		self.name = "";
 		self.channelOpen = false;
+		//self.commandFunctions = {};	
+		
+		self.commandSet = CommandSet.create();
+		self.commandSet.addCommandFuncs(commandFunctions);
 			
 		var configuration = {
 		  'iceServers': [
@@ -92,12 +96,15 @@ var ConnectionObj = {
 		this.setChannelEvents(commandFunctions);
 	},
 	setChannelEvents: function(commandFunctions) {
+		var self = this;
 		this.dataChannel.onmessage = function(event) {
 			var data = JSON.parse(event.data);
+			data["dataChannel"] = this;
 			console.log("received command: " + data.command);
 			console.log("received dataObj: ");
 			console.log(data.dataObj);
-			commandFunctions[data.command](this, data);
+			//commandFunctions[data.command](this, data);
+			self.commandSet.execute(data);
 		};
 	
 		this.dataChannel.onopen = function() {
