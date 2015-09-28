@@ -74,6 +74,11 @@ var CommuTool = {
 			self.processReceivedAnswer(data.originatorID, data.answer, data.peerName);
 			showNameForm();
 		};
+		self.recvFuncs["iceCandidate"] = function(data) {
+			console.log("ICE Candidate update");
+			console.log("Got ICE Candidate from " + data.originatorID);
+			self.addIceCandidateToPeer(data.originatorID, data.candidate);
+		};
 		
 		/*
 		self.recvFuncs[" <YOUR COMMAND> "] = function(data) {
@@ -85,10 +90,12 @@ var CommuTool = {
 		//}
 		//   =>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>
 		
-		self.onIceCandidateHandler = function(candidate) {
-			for(var peerID in self.conObjs) {
-				if(self.conObjs.hasOwnProperty(peerID)) {
-					self.socketInterface.send("re-route", id, peerID, "iceCandidate", {candidate: candidate});
+		self.onOwnIceCandidateHandler = function(candidate) {
+			if(candidate) {
+				for(var peerID in self.conObjs) {
+					if(self.conObjs.hasOwnProperty(peerID)) {
+						self.socketInterface.send("re-route", id, peerID, "iceCandidate", {candidate: candidate});
+					}
 				}
 			}
 		};
@@ -108,7 +115,7 @@ var CommuTool = {
 	
 	//Create a single ConnectionObj for a groupmate
 	createConnectionObj: function(peerID, hasOwnDataChannel) {
-		this.conObjs[peerID] = ConnectionObj.create(this.commandFunctions, this.socketInterface);
+		this.conObjs[peerID] = ConnectionObj.create(this.onOwnIceCandidateHandler, this.commandFunctions, this.socketInterface);
 		
 		if(hasOwnDataChannel == true) {
 			this.conObjs[peerID].makeOwnDataChannel(this.commandFunctions);
@@ -162,7 +169,7 @@ var CommuTool = {
 	//}
 	// )))))))))))))))(((((((((((((((
 	
-
+	//via dataChannel
 	sendToGroup: function(theCommand, theData) {
 		for(var id in this.conObjs) {
 			//console.log(conObjs[id]);

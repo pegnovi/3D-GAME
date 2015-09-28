@@ -1,6 +1,6 @@
 //stores peerConnection and dataChannel
 var ConnectionObj = {
-	create: function(commandFunctions, socketInterface) {
+	create: function(onOwnIceCandidateHandler, commandFunctions, socketInterface) {
 		var self = Object.create(this);
 		
 		self.socketInterface = socketInterface;
@@ -59,6 +59,7 @@ var ConnectionObj = {
 			else {
 				console.log("!!!REMOTE IZ DEFINED!!!");
 			}
+			/*
 			if(event.candidate) {
 				console.log("Sending new ICE Candidate");
 				console.log(event.candidate);
@@ -69,6 +70,10 @@ var ConnectionObj = {
 				//????
 				//self.socketInterface.send(id, , "iceCandidate", {candidate: candidate});
 			}
+			*/
+			//?!
+			onOwnIceCandidateHandler(event.candidate);
+			//?!
 		}
 		self.pc.onnegotiationneeded = function () {
 			console.log("ON NEGOTIATION NEEDED");
@@ -83,10 +88,7 @@ var ConnectionObj = {
 			self.setChannelEvents(commandFunctions);
 		}
 		
-		self.recvFuncs = {};
-		self.recvFuncs["id"] = function(data) {
-
-		};
+		
 		
 		return self;
 	},

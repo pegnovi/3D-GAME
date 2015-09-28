@@ -99,13 +99,6 @@ $(document).ready(function() {
 	//{[[[[[[[[[[[[[[[[[[[]]]]]]]]]]]]]]]]]]]]
 	
 	//Both
-	socket.on("iceCandidateUpdate", function(data) {
-		data = JSON.parse(data);
-		console.log("ICE Candidate update");
-		console.log("Got ICE Candidate from " + data.peerID);
-
-		commuTool.addIceCandidateToPeer(data.peerID, data.iceCandidate);
-	});
 	
 	//Initiator
 	groupMateIDs = [];

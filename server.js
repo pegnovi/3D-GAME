@@ -1,3 +1,5 @@
+//{ Semi-BoilerPlate Code
+
 var express = require('express');
 var socket = require('socket.io');
 var http = require('http');
@@ -57,6 +59,8 @@ app.use(function(err, req, res, next) {
     error: {}
   });
 });
+
+//}
 
 
 var server = http.createServer(app);
@@ -229,52 +233,8 @@ socket.on("connection", function(client) {
         }));
 		*/
     });
-	client.on("signalOffer", function(data) {
-		data = JSON.parse(data);
-		//console.log("!!!IN SIGNAL OFFER with target id = " + data.targetID);
-		//console.log("the offer is = " + data.clientOffer);
 	
-		socket.to(data.targetID).emit("offerFromClient", JSON.stringify({
-			offer: data.clientOffer,
-			offererID: client.id
-		}));
-		
-	});
-	
-	
-	client.on("signalAnswer", function(data) {
-		data = JSON.parse(data);
-		
-		//console.log("client room = " + client.room);
-		socket.to(data.targetID).emit("answerToOffer", JSON.stringify({
-			roomID: client.room,
-			answer: data.clientAnswer,
-			answererID: client.id,
-			answererName: data.clientName
-		}));
-		
-	});
 
-	client.on("iceCandidate", function(data) {
-		data = JSON.parse(data);
-		
-		console.log("ICE candidate from " + client.id);
-		console.log("For room " + data.room);
-		if(groups[data.room] != undefined) {
-			for(var i=0; i<groups[data.room].length; i++) {
-				if(groups[data.room][i].id != client.id) {
-					console.log("Sending ICE Candidate to " + groups[data.room][i].id);
-					socket.to(groups[data.room][i].id).emit("iceCandidateUpdate", JSON.stringify({
-						peerID: client.id,
-						iceCandidate: data.candidate
-					}));
-				}
-			}
-			console.log();
-		
-		}
-	});
-	
     client.on("disconnect", function() {
         if(client.room) {
 			console.log("deleting client " + client.id + " from group");
