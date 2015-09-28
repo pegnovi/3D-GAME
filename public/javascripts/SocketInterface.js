@@ -2,31 +2,38 @@ var SocketInterface = {
 	create: function() {
 		var self = Object.create(this);
 		self.socket = null;
-		self.recvFuncs = null;
+		self.recvFuncs = {};
 		return self;
 	},
 	
-	setSocket: function(socket) {		
+	setSocket: function(socket) {	
 		this.socket = socket;
-	},
-	setRecvFuncs: function(recvFuncs) {
-		this.recvFuncs = recvFuncs;
-	},
-	//This must only be called once setSocket and setRecvFuncs has been called
-	setReRouteRecv: function() {
+		
 		var self = this;
 		//re-route socket messages to "receive" function
-		this.socket.on("re-route", function(data) {
+		this.socket.on("serverMessage", function(data) {
 			self.receive(JSON.parse(data));
 		});
+	
 	},
+	//can add receive functions to recvFuncs from many different scopes
+	addRecvFuncs: function(nuRecvFuncs) {
+		//loop through and add to this.recvFuncs
+		//http://stackoverflow.com/questions/684672/loop-through-javascript-object
+		for(var key in nuRecvFuncs) {
+			if(nuRecvFuncs.hasOwnProperty(key)) {
+				this.recvFuncs[key] = nuRecvFuncs[key];
+			}
+		}
+	},
+
 	
 	//Message Format:
 	//originatorID
 	//targetID
 	//command
 	//data
-	send: function(originatorID, targetID, command, data) {
+	send: function(serverAction, originatorID, targetID, command, data) {
 		
 		console.log("SENDING");
 		
@@ -35,7 +42,7 @@ var SocketInterface = {
 		data["targetID"] = targetID;			
 		data["command"] = command;	//command for the server	
 		
-		this.socket.emit("re-route", JSON.stringify(data));
+		this.socket.emit(serverAction, JSON.stringify(data));
 
 	},
 

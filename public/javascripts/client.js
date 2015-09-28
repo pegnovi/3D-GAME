@@ -1,8 +1,16 @@
 
 $(document).ready(function() {
 
+	var recvFuncs = {};
+	recvFuncs["id"] = function(data) {
+		id = data.id;
+		console.log("Your ID = " + id);
+	}
+	socketInterface.addRecvFuncs(recvFuncs);
 	
-
+	socketInterface.send("serverJob", "", "", "id", {});
+	
+	
 	channelOpen = false;
 
 	//Sketchpad initialization
@@ -133,28 +141,6 @@ $(document).ready(function() {
 	});
 	
 	//Receivor
-	//If receiving offer, the connectionObj created must wait for a datachannel from the new groupmate
-	/*
-	socket.on("offerFromClient", function(data) {
-		
-		data = JSON.parse(data);
-		console.log(data.offer);
-		console.log("from client " + data.offererID);
-		
-		commuTool.processReceivedOffer(data.offererID, data.offer);
-		
-		
-	});
-	socket.on("answerToOffer", function(data) {
-
-		data = JSON.parse(data);	
-
-		commuTool.processReceivedAnswer(data.answererID, data.answer, data.answererName);
-		
-		showNameForm();
-
-	});
-	*/
 	
 	socket.on("deleteMember", function(data) {
 		data = JSON.parse(data);

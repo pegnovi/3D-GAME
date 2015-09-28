@@ -81,8 +81,8 @@ var CommuTool = {
 		};
 		*/
 		
-		self.socketInterface.setRecvFuncs(self.recvFuncs);
-		self.socketInterface.setReRouteRecv();
+		self.socketInterface.addRecvFuncs(self.recvFuncs);
+
 		//}
 		//   =>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>
 		

@@ -81,20 +81,29 @@ socket.on("connection", function(client) {
     client.name = "Unknown";
     client.locked = true;
     
-	//send the client id
-	client.emit("id", JSON.stringify({
-		id: client.id,
-	}));
 	
-	//!!
+	//?!
 	client.on("re-route", function(data) {
 		console.log("RE-ROUTING");
 		var parsedData = JSON.parse(data);
 
-		socket.to(parsedData.targetID).emit("re-route", data);
+		socket.to(parsedData.targetID).emit("serverMessage", data);
 
 	});
-
+	var serverJobFuncs = {};
+	serverJobFuncs["id"] = function(data) {
+		client.emit("serverMessage", JSON.stringify({
+			originatorID: "server",
+			command: "id",
+			id: client.id
+		}));
+	};
+	client.on("serverJob", function(data) {
+		data = JSON.parse(data);
+		serverJobFuncs[data.command](data);
+	});
+	//?!
+	
  
     client.on("createid", function() {
 		console.log("SERVER CREATE ROOM ID!!!");

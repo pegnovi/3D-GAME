@@ -138,7 +138,7 @@ var ConnectionObj = {
 					}));
 					*/
 					console.log("SENDING OFFER");
-					self.socketInterface.send(id, peerID, "offerFromPeer", {offer: offer});
+					self.socketInterface.send("re-route", id, peerID, "offerFromPeer", {offer: offer});
 					
 				}, error);
 		}, error);
@@ -178,7 +178,7 @@ var ConnectionObj = {
 				}));
 				*/
 				console.log("SENDING ANSWER");
-				self.socketInterface.send(id, offererID, "answerFromPeer", {peerName: self.name, answer: answer});
+				self.socketInterface.send("re-route", id, offererID, "answerFromPeer", {peerName: self.name, answer: answer});
 				
 				
 			}, error);
