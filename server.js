@@ -102,12 +102,38 @@ socket.on("connection", function(client) {
 			id: client.id
 		}));
 	};
+	serverJobFuncs["deletePeer"] = function() {
+		if(client.room) {
+			console.log("deleting client " + client.id + " from group");
+
+			//delete client from group
+			var index = groups[client.room].indexOf(client);
+			groups[client.room].splice(index,1);
+			
+			//tell all other clients in the group to delete this client
+			for(var i=0; i<groups[client.room].length; i++) {
+				console.log("HERE with " + groups[client.room][i].id);
+				socket.to(groups[client.room][i].id).emit("serverMessage", JSON.stringify({
+					originatorID: "server",
+					command: "deletePeer",
+					peerToDelete: client.id
+				}));
+			}
+			
+			if(groups[client.room].length == 0) {
+				console.log("group member count == 0 so deleting entire group");
+				delete groups[client.room];
+			}
+			delete client;
+        }
+	};
 	client.on("serverJob", function(data) {
 		data = JSON.parse(data);
 		serverJobFuncs[data.command](data);
 	});
 	//?!
 	
+ 
  
     client.on("createid", function() {
 		console.log("SERVER CREATE ROOM ID!!!");
@@ -236,27 +262,7 @@ socket.on("connection", function(client) {
 	
 
     client.on("disconnect", function() {
-        if(client.room) {
-			console.log("deleting client " + client.id + " from group");
-
-			//delete client from group
-			var index = groups[client.room].indexOf(client);
-			groups[client.room].splice(index,1);
-			
-			//tell all other clients in the group to delete this client
-			for(var i=0; i<groups[client.room].length; i++) {
-				console.log("HERE with " + groups[client.room][i].id);
-				socket.to(groups[client.room][i].id).emit("deleteMember", JSON.stringify({
-					memberToDelete: client.id
-				}));
-			}
-			
-			if(groups[client.room].length == 0) {
-				console.log("group member count == 0 so deleting entire group");
-				delete groups[client.room];
-			}
-			delete client;
-        }
+        serverJobFuncs["deletePeer"]();
     });
 	
 });
