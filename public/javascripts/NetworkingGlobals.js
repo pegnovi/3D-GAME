@@ -3,7 +3,7 @@ var SessionDescription = null;
 var RTCIceCandidate = null;
 
 var socket = null;
-var socketInterface = SocketInterface.create();
+var socketInterface = new SocketInterface();
 var id = null;
 
 $(document).ready(function() {
@@ -24,8 +24,8 @@ $(document).ready(function() {
 	console.log("connecting...");
 	
 	//socket = io.connect("p2pChatAndDraw.jit.su:80"); //use this if uploading to nodejitsu
-	//socket = io.connect("http://nodejswebrtc-pegtest.rhcloud.com:8000/", {'forceNew':true});
-	socket = io.connect("127.0.0.1:3000"); //use this if running locally
+	socket = io.connect("http://nodejswebrtc-pegtest.rhcloud.com:8000/", {'forceNew':true, 'sync disconnect on unload': true });
+	//socket = io.connect("127.0.0.1:3000", {'sync disconnect on unload': true }); //use this if running locally
 	
 	socketInterface.setSocket(socket);
 	

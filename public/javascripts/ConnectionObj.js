@@ -1,18 +1,16 @@
 //stores peerConnection and dataChannel
-var ConnectionObj = {
-	create: function(onOwnIceCandidateHandler, commandFunctions, socketInterface) {
-		var self = Object.create(this);
-		
-		self.socketInterface = socketInterface;
-		self.name = "";
-		self.channelOpen = false;
-		//self.commandFunctions = {};	
-		
-		self.commandSet = CommandSet.create();
-		self.commandSet.addCommandFuncs(commandFunctions);
-			
-		var configuration = {
-		  'iceServers': [
+var ConnectionObj = function(targetID, commandSet, socketInterface) {
+	this.targetID = targetID;
+	this.commandSetDataChannel = commandSet;
+	this.socketInterface = socketInterface;
+	
+	this.name = "";
+	this.channelOpen = false;
+	this.pc = null;
+	this.dataChannel = null;
+	
+	var configuration = {
+		'iceServers': [
 			{'url':'stun:stun01.sipphone.com'},
 			{'url':'stun:stun.ekiga.net'},
 			{'url':'stun:stun.fwdnet.net'},
@@ -47,158 +45,125 @@ var ConnectionObj = {
 				'credential': 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
 				'username': '28224511:1379330808'
 			}
-		  ]
-		};
-		
-		//Create own PeerConnection 
-		self.pc = new PeerConnection(configuration);
-		self.pc.onicecandidate = function(event) {
-			if(self.pc.remoteDescription == undefined || self.pc.remoteDescription == null) {
-				console.log("!!!REMOTE UNDEFINED!!!");
-			}
-			else {
-				console.log("!!!REMOTE IZ DEFINED!!!");
-			}
-			/*
-			if(event.candidate) {
-				console.log("Sending new ICE Candidate");
-				console.log(event.candidate);
-				self.socketInterface.socket.emit("iceCandidate", JSON.stringify({
-					room: roomId, //(roomId is not defined)
-					candidate: event.candidate
-				}));
-				//????
-				//self.socketInterface.send(id, , "iceCandidate", {candidate: candidate});
-			}
-			*/
-			//?!
-			onOwnIceCandidateHandler(event.candidate);
-			//?!
+		]
+	};
+	
+	//Create own PeerConnection 
+	this.pc = new PeerConnection(configuration);
+	var self = this;
+	this.pc.onicecandidate = function(event) {
+		if(self.pc.remoteDescription == undefined || self.pc.remoteDescription == null) {
+			console.log("!!!REMOTE UNDEFINED!!!");
 		}
-		self.pc.onnegotiationneeded = function () {
-			console.log("ON NEGOTIATION NEEDED");
-			//??
-			//sendOfferToGroupmates(gpsIDs);
+		else {
+			console.log("!!!REMOTE IZ DEFINED!!!");
 		}
-		self.dataChannel = null;
-		
-		self.pc.ondatachannel = function(event) {
-			console.log("GOT A DATA CHANNEL!!!");
-			self.dataChannel = event.channel;
-			self.setChannelEvents(commandFunctions);
+		if(event.candidate) {
+			self.socketInterface.send("re-route", id, targetID, "iceCandidate", {candidate: event.candidate});
 		}
+	};
+	this.pc.onnegotiationneeded = function () {
+		console.log("ON NEGOTIATION NEEDED");
+		//??
+		//sendOfferToGroupmates(gpsIDs);
+	};
 		
-		
-		
-		return self;
-	},
-	
-	makeOwnDataChannel: function(commandFunctions) {
-		this.dataChannel = this.pc.createDataChannel("dataChannel");
-		this.setChannelEvents(commandFunctions);
-	},
-	setChannelEvents: function(commandFunctions) {
-		var self = this;
-		this.dataChannel.onmessage = function(event) {
-			var data = JSON.parse(event.data);
-			data["dataChannel"] = this;
-			console.log("received command: " + data.command);
-			console.log("received dataObj: ");
-			console.log(data.dataObj);
-			//commandFunctions[data.command](this, data);
-			self.commandSet.execute(data);
-		};
-	
-		this.dataChannel.onopen = function() {
-			console.log("channel open");
-			this.channelOpen = true;
-		}
-		this.dataChannel.onclose = function() {
-			console.log("channel close");
-			this.channelOpen = false;
-		}
-	},
-	
-	setDataChannel : function(channel) {
-		this.dataChannel = channel;
-	},
-	
-	
-	
-	addIceCandidateToPeerConnection : function(daIceCandidate) {
-		this.pc.addIceCandidate(new RTCIceCandidate(daIceCandidate));
-	},
-	
-	//{(((((((((( Initiator ))))))))))
-	
-	//peerID = the target groupmate's ID that the offer will be sent to
-	createOfferToPeerConnection : function(peerID) {
-		var self = this;
-		var ownPeerConnection = this.pc;
-		
-		ownPeerConnection.createOffer(function(offer) {
-			ownPeerConnection.setLocalDescription(new SessionDescription(offer), 
-				function() {
-					//send the offer to a server to be forwarded to the friend you're calling
-					/*
-					self.socketInterface.emit("signalOffer", JSON.stringify({
-						targetID: peerID,
-						clientOffer: offer
-					}));
-					*/
-					console.log("SENDING OFFER");
-					self.socketInterface.send("re-route", id, peerID, "offerFromPeer", {offer: offer});
-					
-				}, error);
-		}, error);
-	},
-	//}
-	//(((((((((((((((())))))))))))))))
-	
-	//{)))))))))) Receivor ((((((((((
-	//If receiving offer, the connectionObj created must wait for a datachannel from the new groupmate
-	processReceivedOffer: function(offererID, offer) {
-		var self = this;
-		var ownPeerConnection = this.pc;
-		
-		ownPeerConnection.setRemoteDescription(new SessionDescription(offer), function() {
-				
-			self.createAnswer(offererID);
-			
-		}, error);
-	},
-	
-	createAnswer: function(offererID) {
-		var self = this;
-		var ownPeerConnection = this.pc;
-		
-		ownPeerConnection.createAnswer(function(answer) {
-			
-			
-			ownPeerConnection.setLocalDescription(new SessionDescription(answer), function() {
-			
-				//https://github.com/ESTOS/strophe.jingle/issues/35
-				//send the answer to a server to be forwarded back to the caller
-				/*
-				self.socketInterface.emit("signalAnswer", JSON.stringify({
-					clientName: self.name,
-					clientAnswer: answer,
-					targetID: offererID 
-				}));
-				*/
-				console.log("SENDING ANSWER");
-				self.socketInterface.send("re-route", id, offererID, "answerFromPeer", {peerName: self.name, answer: answer});
-				
-				
-			}, error);
-		}, error);
-	},
-	
-	processAnswer: function(answer) {
-		var ownPeerConnection = this.pc;
-		ownPeerConnection.setRemoteDescription(new SessionDescription(answer), function() {}, error);
-	},
-	//}
-	// )))))))))))))))(((((((((((((((
+	this.pc.ondatachannel = function(event) {
+		console.log("GOT A DATA CHANNEL!!!");
+		self.dataChannel = event.channel;
+		self.setChannelEvents();
+	};
 	
 };
+
+ConnectionObj.prototype.makeOwnDataChannel = function() {
+	this.dataChannel = this.pc.createDataChannel("dataChannel");
+	this.setChannelEvents();
+};
+
+ConnectionObj.prototype.setChannelEvents = function() {
+	var self = this;
+	this.dataChannel.onmessage = function(event) {
+		var data = JSON.parse(event.data);
+		data["dataChannel"] = this;
+		console.log("received command: " + data.command);
+		console.log("received dataObj: ");
+		console.log(data.dataObj);
+
+		self.commandSetDataChannel.execute(data);
+	};
+	
+	this.dataChannel.onopen = function() {
+		console.log("channel open");
+		self.channelOpen = true;
+	};
+	this.dataChannel.onclose = function() {
+		console.log("channel close");
+		self.channelOpen = false;
+	};
+};
+
+ConnectionObj.prototype.setDataChannel = function(channel) {
+	this.dataChannel = channel;
+};
+
+ConnectionObj.prototype.addIceCandidateToPeerConnection = function(daIceCandidate) {
+	console.log("Adding Candidate: ");
+	console.log(daIceCandidate);
+	this.pc.addIceCandidate(new RTCIceCandidate(daIceCandidate));
+};
+
+//{(((((((((( Initiator ))))))))))
+	
+//peerID = the target groupmate's ID that the offer will be sent to
+ConnectionObj.prototype.createOfferToPeerConnection = function(peerID) {
+	var self = this;
+
+	self.pc.createOffer(function(offer) {
+		self.pc.setLocalDescription(new SessionDescription(offer), 
+			function() {
+				//send the offer to a server to be forwarded to the friend you're calling
+				console.log("SENDING OFFER");
+				self.socketInterface.send("re-route", id, peerID, "offerFromPeer", {offer: offer});
+					
+			}, error);
+	}, error);
+};
+//}
+//(((((((((((((((())))))))))))))))
+
+
+//{)))))))))) Receivor ((((((((((
+//If receiving offer, the connectionObj created must wait for a datachannel from the new groupmate
+ConnectionObj.prototype.processReceivedOffer = function(offererID, offer) {
+	var self = this;
+	var ownPeerConnection = this.pc;
+		
+	ownPeerConnection.setRemoteDescription(new SessionDescription(offer), function() {
+		self.createAnswer(offererID);		
+	}, error);
+};
+	
+ConnectionObj.prototype.createAnswer = function(offererID) {
+	var self = this;
+		
+	self.pc.createAnswer(function(answer) {
+			
+		self.pc.setLocalDescription(new SessionDescription(answer), function() {
+			
+			//https://github.com/ESTOS/strophe.jingle/issues/35
+			//send the answer to a server to be forwarded back to the caller
+			console.log("SENDING ANSWER");
+			self.socketInterface.send("re-route", id, offererID, "answerFromPeer", {peerName: self.name, answer: answer});
+					
+		}, error);
+	}, error);
+};
+	
+ConnectionObj.prototype.processAnswer = function(answer) {
+	this.pc.setRemoteDescription(new SessionDescription(answer), function() {}, error);
+};
+//}
+// )))))))))))))))(((((((((((((((
+
+

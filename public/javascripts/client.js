@@ -42,7 +42,7 @@ $(document).ready(function() {
 	
 	console.log("Room ID = " + roomId);
 	
-	var commuTool = CommuTool.create(socketInterface /*, roomId*/);
+	var commuTool = new CommuTool(socketInterface /*, roomId*/);
 	
 	if(roomId) {
 		showLoading();
@@ -98,15 +98,11 @@ $(document).ready(function() {
 	// SOCKET WebRTC Handshake 
 	//{[[[[[[[[[[[[[[[[[[[]]]]]]]]]]]]]]]]]]]]
 	
-	//Both
-	
 	//Initiator
-	groupMateIDs = [];
 	socket.on("roomExists", function(data) {
 		console.log("Room Exists, Sending Offer to groupmates");
 		data = JSON.parse(data);
-		groupMateIDs = data.groupmatesIDs;
-		
+
 		//Create ConnectionObj for each groupmate
 		commuTool.createConnectionObjs(data.groupmatesIDs, true);
 		
@@ -129,19 +125,6 @@ $(document).ready(function() {
 		}
 	});
 	
-	//Receivor
-	
-	socket.on("deleteMember", function(data) {
-		data = JSON.parse(data);
-		console.log("DELETING MEMBER " + data.memberToDelete);
-
-		$("#convo").append(">" + commuTool.conObjs[data.memberToDelete].name + " has left!\n");
-		convoHasChanged();
-		
-		commuTool.deletePeer(data.memberToDelete);
-		
-		
-	});
 	//}
 	//[[[[[[[[[[[[[[[[[[[[]]]]]]]]]]]]]]]]]]]]
 

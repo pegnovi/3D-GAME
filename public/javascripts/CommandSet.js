@@ -1,25 +1,19 @@
-
-var CommandSet = {
-	create: function() {
-		var self = Object.create(this);
-		
-		self.commandFuncs = {};	
-		
-		return self;
-	},
-	
-	addCommandFuncs: function(nuCommandFuncs) {
-		//loop through and add to this.nuCommandFuncs
-		//http://stackoverflow.com/questions/684672/loop-through-javascript-object
-		for(var key in nuCommandFuncs) {
-			if(nuCommandFuncs.hasOwnProperty(key)) {
-				this.commandFuncs[key] = nuCommandFuncs[key];
-			}
+var CommandSet = function() {
+	this.commandFuncs = {};
+};
+CommandSet.prototype.addCommandFuncs = function(nuCommandFuncs) {
+	//loop through and add to this.nuCommandFuncs
+	//http://stackoverflow.com/questions/684672/loop-through-javascript-object
+	for(var key in nuCommandFuncs) {
+		if(nuCommandFuncs.hasOwnProperty(key)) {
+			this.commandFuncs[key] = nuCommandFuncs[key];
 		}
-	},
+	}
+};
+CommandSet.prototype.addCommandFunc = function(commandName, commandFunc) {
+	this.commandFuncs[commandName] = commandFunc;
+};
 	
-	execute: function(data) {
-		this.commandFuncs[data.command](data);
-	},
-	
+CommandSet.prototype.execute = function(data) {
+	this.commandFuncs[data.command](data);
 };
