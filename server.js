@@ -5,14 +5,19 @@ var socket = require('socket.io');
 var http = require('http');
 var path = require('path');
 var favicon = require('serve-favicon');
-var logger = require('morgan');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
+var bodyParser = require('body-parser'); //lets us pull POST content from HTTP request for processing
+var morgan = require('morgan'); //used to see requests
+var mongoose = require('mongoose');
+mongoose.connect('mongodb://localhost/test');
 
-var routes = require('./routes/index');
-var users = require('./routes/users');
 
-var app = express();
+var routes = require('./routes/index').router;
+var apiRoutes = require('./routes/index').apiRouter;
+
+var app = express(); //define our app using express
+
+// APP CONFIG
+// --------------------
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -20,14 +25,23 @@ app.set('view engine', 'ejs');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-app.use(logger('dev'));
+app.use(morgan('dev'));
+//use body parser so we can get info from POST requests
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cookieParser());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+// configure our app to handle CORS requests
+app.use(function(req, res, next) {
+	res.setHeader('Access-Control-Allow-Origin', '*');
+	res.setHeader('Access-Control-Allow-Methods', 'GET, POST');
+	res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type, \Authorization');
+	next();
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', routes);
-app.use('/users', users);
+app.use('/api', apiRoutes);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -61,6 +75,8 @@ app.use(function(err, req, res, next) {
 });
 
 //}
+
+
 
 
 var server = http.createServer(app);
