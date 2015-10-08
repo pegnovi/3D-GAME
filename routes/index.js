@@ -5,6 +5,8 @@ var User = require('../models/user');
 var jwt = require('jsonwebtoken');
 var superSecret = 'blahThisblahIsblahSuperblahSecretblah';
 
+var path = require('path');
+
 /* GET home page. */
 router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
@@ -204,6 +206,15 @@ apiRouter.route('/users/:user_id')
 			res.json({ message: 'Successfully deleted' });
 		});
 	});
-	
+
+//Main CatchAll Route
+//send users to frontend (angular app)
+//has to be registered after API routes
+/*
+app.get('*', function(req, res) {
+	res.sendFile(path.join(__dirname + '/public/app/views/index.html'));
+});	
+*/
+
 module.exports.router = router;
 module.exports.apiRouter = apiRouter;
