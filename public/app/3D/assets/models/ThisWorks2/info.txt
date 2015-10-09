@@ -1,0 +1,7 @@
+have an action called "Rest"
+When exporting:
+- bake all action anims
+- delete other ik bones
+- alt + g, r, s on all bones in pose mode
+- select model & deselect
+and then export
