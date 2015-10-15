@@ -21,9 +21,8 @@ function Game() {
 	this.camera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
 	
 
-	
 	//Add stuff to scene
-	//++++++++++++++++++++
+	//{++++++++++++++++++++
 	this.world.scene.add(this.camera);
 	this.camera.position.set(0, 5, 10);
 	console.log("cam parent = " );
@@ -44,15 +43,18 @@ function Game() {
 	pointLight.position.z = 30;
 	// add to the scene
 	this.world.scene.add(pointLight);
-	//++++++++++++++++++++
+	//}++++++++++++++++++++
+	// ++++++++++++++++++++
 
 	//this.loader = new THREEx.UniversalLoader();
 	this.loader = new THREE.JSONLoader;
 	this.thing = new Thing(this.loader, "humanLowPoly8.json", this.world.scene, this.camera);
+	this.thingController = new ThingController(this.thing, this.camera);
 	
 	//User Input
 	//->->->->->->->->->->->->->->->->->->->->
 	this.input = new Input(this.graphics.renderer, this.thing, this.camera);
+	this.input.stateCommandSet.addCommandFunc('In-Game', this.thingController.commandFunction);
 	//->->->->->->->->->->->->->->->->->->->->
 	
 	
@@ -83,6 +85,7 @@ Game.prototype.runGame = function() {
 		lastTimeMsec = currTimeMsec;
 
 		
+		
 		if(daThing.animations !== undefined) {
 			THREE.AnimationHandler.update( deltaMsec/2000 );
 		}
@@ -91,11 +94,16 @@ Game.prototype.runGame = function() {
 		}
 		
 		
+		/*
 		//call update functions
 		daInput.inGameUpdateFuncs.forEach(function(updateFn) {
 		//updateFuncts.forEach(function(updateFn) {
 			updateFn(deltaMsec/1000, currTimeMsec/1000);
 		});
+		*/
+		//***!!!
+		daInput.stateCommandSet.execute({command: daInput.gameState, delta: (deltaMsec/1000), now: (currTimeMsec/1000), input: daInput});
+		daInput.ownStateCommandSet.execute({command: daInput.gameState});
 		
 		//draw
 		daGraphics.renderer.render( daWorld.scene, daCamera );

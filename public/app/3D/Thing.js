@@ -1,15 +1,11 @@
-function Thing(loader, modelName, scene, camera) {
+function Thing(loader, modelName, scene) {
 	
-	this.camOrientation = new THREE.Quaternion(0,0,0,1);
-	
-	this.camera = camera;
+
 	this.forward = new THREE.Vector3(0,0,-1);
 	this.right = new THREE.Vector3(1,0,0);
 	this.up = new THREE.Vector3(0,1,0);
 	
-	this.boostMode = false;
-	this.meleeBoostMode = false;
-	this.speed = 100;
+	
 	
 	//LOAD MODEL
 	var url = dir_path + "assets/models/" + modelName;
@@ -68,16 +64,7 @@ Thing.prototype.update = function(delta) {
 	
 };
 
-Thing.prototype.changeBoostMode = function(boostModeOn) {
-	this.boostMode = boostModeOn
-	
-	if(this.boostMode == true) {
-		this.speed = 400;
-	}
-	else {
-		this.speed = 100;
-	}
-};
+
 
 Thing.prototype.updateAxes = function(rotQuat, updateUpAxis) {
 	this.forward.applyQuaternion(rotQuat);
@@ -107,13 +94,6 @@ Thing.prototype.rotate = function(axis, angleDegrees, updateUpAxis) {
 	this.updateAxes(rotQuat, updateUpAxis);
 
 };
-
-Thing.prototype.rotateCam = function(axis, angleDegrees) {
-	var rotQuat = new THREE.Quaternion();
-	rotQuat.setFromAxisAngle(axis, angleDegrees * 0.01745);
-	
-	this.camOrientation.multiplyQuaternions(rotQuat, this.camOrientation);
-}
 
 
 Thing.prototype.move = function(axis, amt) {

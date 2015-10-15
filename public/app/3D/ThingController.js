@@ -1,22 +1,57 @@
+//object controller interface
+//must have commandFunction(data)
+
 function ThingController(targetThing, camera) {
-	this.targetThing = targetThing;
+	
+	var self = this;
+
+	this.camOrientation = new THREE.Quaternion(0,0,0,1);
 	this.camera = camera;
+	
+	this.boostMode = false;
+	this.meleeBoostMode = false;
+	this.speed = 100;
+	
+	this.targetThing = targetThing;
+
 	
 	this.mode = 1; //0 = space, 1 = ground
 	
-	this.wKeyPressTime = -1;
 	
 	this.prevKeyPressed = ' ';
 	this.keyPressed = ' ';
 	this.keyPressedTime = -1;
 	
-	console.log("=== TEST ===");
-	console.log(this.prevKeyPressed != ' ');
+	
+	this.commandFunction = function(data) {
+		self.processUserInput(data.delta, data.now, 
+							  data.input.mouseMovX, data.input.mouseMovY,
+							  data.input.leftClick, data.input.rightClick,
+							  data.input.scrollVall, data.input.keyboard);
+	};
 };
 
 ThingController.prototype.setMode = function(mode) {
 	if(mode >= 0 || mode <= 1) {
 		this.mode = mode;	
+	}
+};
+
+ThingController.prototype.rotateCam = function(axis, angleDegrees) {
+	var rotQuat = new THREE.Quaternion();
+	rotQuat.setFromAxisAngle(axis, angleDegrees * 0.01745);
+	
+	this.camOrientation.multiplyQuaternions(rotQuat, this.camOrientation);
+}
+
+ThingController.prototype.changeBoostMode = function(boostModeOn) {
+	this.boostMode = boostModeOn
+	
+	if(this.boostMode == true) {
+		this.speed = 400;
+	}
+	else {
+		this.speed = 100;
 	}
 };
 
@@ -36,11 +71,26 @@ ThingController.prototype.checkBoostMode = function(now, userActed) {
 		this.keyPressedTime = now;
 	}
 	else {
-		this.targetThing.changeBoostMode(false);
+		this.changeBoostMode(false);
 	}
 
 	
 };	
+
+//called in the context of input class (so this won't work the way we want it to
+/*
+ThingController.prototype.runProcess = function(data) {
+
+	console.log("ThingController this is");
+	console.log(this);
+	
+	this.processUserInput(data.delta, data.now, 
+						  data.input.mouseMovX, data.input.mouseMovY,
+						  data.input.leftClick, data.input.rightClick,
+						  data.input.scrollVall, data.input.kb);
+						  
+};
+*/
 
 ThingController.prototype.processUserInput = function(delta, now, mouseMovX, mouseMovY, leftClick, rightClick, scrollVal, kb) {
 	
@@ -53,12 +103,12 @@ ThingController.prototype.processUserInput = function(delta, now, mouseMovX, mou
 	
 		if(mouseMovX != 0) {
 			//this.targetThing.rotate(this.targetThing.up, -mouseMovX*0.1, false);
-			this.targetThing.rotateCam(this.targetThing.up, -mouseMovX*0.1);
+			this.rotateCam(this.targetThing.up, -mouseMovX*0.1);
 			mouseMoved = true;
 		}
 		if(mouseMovY != 0) {
 			//this.targetThing.rotate(this.targetThing.right, -mouseMovY*0.1, false);
-			this.targetThing.rotateCam(this.targetThing.right, -mouseMovY*0.1);
+			this.rotateCam(this.targetThing.right, -mouseMovY*0.1);
 			mouseMoved = true;
 		}
 		
@@ -68,12 +118,12 @@ ThingController.prototype.processUserInput = function(delta, now, mouseMovX, mou
 	else if(this.mode == 0) {
 		if(mouseMovX != 0) {
 			this.targetThing.rotate(this.targetThing.up, -mouseMovX*0.1, false);
-			this.targetThing.rotateCam(this.targetThing.up, -mouseMovX*0.1);
+			this.rotateCam(this.targetThing.up, -mouseMovX*0.1);
 			mouseMoved = true;
 		}
 		if(mouseMovY != 0) {
 			this.targetThing.rotate(this.targetThing.right, -mouseMovY*0.1, false);
-			this.targetThing.rotateCam(this.targetThing.right, -mouseMovY*0.1);
+			this.rotateCam(this.targetThing.right, -mouseMovY*0.1);
 			mouseMoved = true;
 		}
 	}
@@ -140,7 +190,7 @@ ThingController.prototype.updateCamera = function() {
 	
 	//Cam position due to targetThing rotations
 	var camOffset = new THREE.Vector3(0, 3, 10);
-	camOffset.applyQuaternion(this.targetThing.camOrientation);
+	camOffset.applyQuaternion(this.camOrientation);
 	camOffset.add(this.targetThing.model.position);
 	this.camera.position.copy(camOffset);
 	
@@ -153,7 +203,7 @@ ThingController.prototype.updateCamera = function() {
 	//lookAtTargetVec.add(this.targetThing.forward);
 	this.camera.lookAt(lookAtTargetVec);
 	*/
-	this.camera.quaternion.copy(this.targetThing.camOrientation);
+	this.camera.quaternion.copy(this.camOrientation);
 	
 	//console.log(this.camera.position);
 };

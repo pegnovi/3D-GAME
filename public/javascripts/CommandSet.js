@@ -15,5 +15,10 @@ CommandSet.prototype.addCommandFunc = function(commandName, commandFunc) {
 };
 	
 CommandSet.prototype.execute = function(data) {
-	this.commandFuncs[data.command](data);
+	if(data.command !== undefined) {
+		this.commandFuncs[data.command](data);
+	}
+	else {
+		console.log("NO COMMAND GIVEN SO DOING NOTHING...");
+	}
 };

@@ -1,6 +1,12 @@
 function Input(renderer, targetThing, camera) {
-	var that = this;
 
+	var self = this;
+	
+	this.gameState = 'In-Game'; 
+	this.stateCommandSet = new CommandSet(); //for other classes to hook into depending on state
+	this.ownStateCommandSet = new CommandSet(); //for own actions depending on state
+	
+	
 	this.keyboard = new THREEx.KeyboardState(renderer.domElement);
 	this.mouseMovX = 0;
 	this.mouseMovY = 0;
@@ -10,17 +16,17 @@ function Input(renderer, targetThing, camera) {
 	this.rightClick = false;
 	this.scrollVal = 0;
 	
-	this.thingController = new ThingController(targetThing, camera);
-	
 	
 	var canvas = renderer.domElement;
 
 	canvas.setAttribute("tabIndex", "0");
 	//canvas.focus();
 	
-	//Hook Mouse Events to class attributes
-	//??????????????????????????????????????????????????
-	//??????????????????????????????????????????????????
+	//  ??????????????????????????????????????????????????
+	//  ??????????????????????????????????????????????????
+	//     Hook Mouse Events to class attributes
+	//{ ??????????????????????????????????????????????????
+	//  ??????????????????????????????????????????????????
 	canvas.requestPointerLock = canvas.requestPointerLock || canvas.mozRequestPointerLock || canvas.webkitRequestPointerLock;
 	//canvas.requestPointerLock();
 	
@@ -41,13 +47,13 @@ function Input(renderer, targetThing, camera) {
 			
 			console.log('In-Game click');
 			if(event.button == 0) {
-				that.leftClick = true;
+				self.leftClick = true;
 			}
 			if(event.button == 1) {
-				that.middleClick = true;
+				self.middleClick = true;
 			}
 			if(event.button == 2) {
-				that.rightClick = true;
+				self.rightClick = true;
 			}
 			
 		}
@@ -70,13 +76,13 @@ function Input(renderer, targetThing, camera) {
 			
 			console.log('In-Game mouseup');
 			if(event.button == 0) {
-				that.leftClick = false;
+				self.leftClick = false;
 			}
 			if(event.button == 1) {
-				that.middleClick = false;
+				self.middleClick = false;
 			}
 			if(event.button == 2) {
-				that.rightClick = false;
+				self.rightClick = false;
 			}
 			
 		}
@@ -94,7 +100,7 @@ function Input(renderer, targetThing, camera) {
 			
 			console.log('In-Game mousewheel');
 			console.log(event.detail);
-			that.scrollVal = event.detail;
+			self.scrollVal = event.detail;
 
 		}
 		else { //Not yet locked
@@ -106,8 +112,8 @@ function Input(renderer, targetThing, camera) {
 	
 	canvas.addEventListener( 'mousemove', function(event) {
 		//console.log(event);
-		that.mouseMovX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
-		that.mouseMovY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
+		self.mouseMovX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
+		self.mouseMovY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
 	}, false );
 	
 	
@@ -115,86 +121,14 @@ function Input(renderer, targetThing, camera) {
 	$(document).on('mozpointerlockchange', function() { console.log("lock change alert"); });
 	document.addEventListener('mozpointerlockerror', function() { console.log("lock error"); }, false);
 	
-	//??????????????????????????????????????????????????
-	//??????????????????????????????????????????????????
+	//}
+	//  ??????????????????????????????????????????????????
+	//  ??????????????????????????????????????????????????
 	
-	
-	
-	//In-Game Input Update Functions
-	this.inGameUpdateFuncs = [];
-	this.inGameUpdateFuncs.push(function(delta, now) {
-		
-		that.thingController.processUserInput(delta, now, 
-							that.mouseMovX, that.mouseMovY, 
-							that.leftClick, that.rightClick, 
-							that.scrollVal, 
-							that.keyboard);
-		that.resetMouseMovs();
-		
-		/*
-		var kb = that.keyboard;
-	
-		var userActed = false;
-		
-		if(that.mouseMovX != 0) {
-			targetThing.rotate(targetThing.up, -that.mouseMovX*0.1, false);
-			targetThing.rotateCam(targetThing.up, -that.mouseMovX*0.1);
-			userActed = true;
-			that.mouseMovX = 0;
-		}
-		if(that.mouseMovY != 0) {
-			//targetThing.rotate(targetThing.right, -that.mouseMovY*0.1, false);
-			targetThing.rotateCam(targetThing.right, -that.mouseMovY*0.1);
-			userActed = true;
-			that.mouseMovY = 0;
-		}
-	
-		//console.log("keyboard = "); console.log(keyboard);
-		//console.log("delta = " + delta);
-		if( kb.pressed('d') ) {
-			targetThing.move(targetThing.right, 100*delta);
-			userActed = true;
-		}
-		else if( kb.pressed('a') ) {
-			var moveVec = new THREE.Vector3();
-			moveVec.copy(targetThing.right);
-			moveVec.negate();
-			targetThing.move(moveVec, 100*delta);
-			userActed = true;
-		}
-		
-		if( kb.pressed('w') ) {
-			targetThing.move(targetThing.forward, 100*delta);
-			userActed = true;
-		}
-		else if( kb.pressed('s') ) {
-			var moveVec = new THREE.Vector3();
-			moveVec.copy(targetThing.forward);
-			moveVec.negate();
-			targetThing.move(moveVec, 100*delta);
-			userActed = true;
-		}
-		
-		if( kb.pressed('space') ) {
-			targetThing.move(targetThing.up, 100*delta);
-			userActed = true;
-		}
-		else if( kb.pressed('x') ) {
-			var moveVec = new THREE.Vector3();
-			moveVec.copy(targetThing.up);
-			moveVec.negate();
-			targetThing.move(moveVec, 100*delta);
-			userActed = true;
-		}
-		
-		if(userActed == true) {
-			that.updateCamera(targetThing, camera);
-		}
-		*/
-		
-	});
 
-	
+	this.ownStateCommandSet.addCommandFunc('In-Game', function(data) {
+		self.resetMouseMovs();
+	});
 };
 
 Input.prototype.resetMouseMovs = function() {
