@@ -7,8 +7,9 @@ var path = require('path');
 var favicon = require('serve-favicon');
 var bodyParser = require('body-parser'); //lets us pull POST content from HTTP request for processing
 var morgan = require('morgan'); //used to see requests
-//var mongoose = require('mongoose');
-//mongoose.connect('mongodb://localhost/test');
+
+var mongoose = require('mongoose');
+mongoose.connect('mongodb://localhost/test');
 
 
 var routes = require('./routes/index').router;

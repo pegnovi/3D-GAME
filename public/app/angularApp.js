@@ -14,7 +14,6 @@ function($stateProvider, $urlRouterProvider) {
 		url: '/',
 		views: {
 			'@': {
-				controller: 'RoomsCtrl',
 				templateUrl: 'app/views/pages/home/home.html',
 			}
 		}
@@ -54,19 +53,82 @@ function($stateProvider, $urlRouterProvider) {
 		}
 	});
 	
+	// +-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+
+	// +-=-+-=-+-=-+-=-+ GAME! +-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+
+	//{+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+
+	$stateProvider.state('game', {
+		url: '/game',
+		abstract: true,
+		templateUrl: 'app/views/pages/game/game.html'
+	});
+	$stateProvider.state('game.rooms', {
+		url: '/rooms',
+		views: {
+			'@': {
+				templateUrl: 'app/views/pages/game/rooms.html',
+				controller: 'RoomsCtrl as RoomsCtrl',
+				resolve: {
+					roomsPromise: ['roomsFactory', function(roomsFactory) {
+						return roomsFactory.getAllRooms();
+					}]
+				}
+			}
+		}
+	});
+	
+	//read
+	//https://github.com/angular-ui/ui-router/wiki
+	//for various state transitioning options
+	$stateProvider.state('game.roomLobby', {
+		url: '/room/{id}',
+		views: {
+			'@': {
+				templateUrl: 'app/views/pages/game/roomLobby.html',
+				controller: 'RoomsCtrl as RoomsCtrl',
+				resolve: {
+					
+					/*
+					room: ['$stateParams', 'roomsFactory', function($stateParams, roomsFactory) {
+						return roomsFactory.get($stateParams.id);
+					}]
+					*/
+					
+					
+					room: ['roomsFactory', function(roomsFactory) {
+						return roomsFactory.get(roomsFactory.chosenRoomID);
+					}]
+					
+				}
+			}
+		}
+	});
+	$stateProvider.state('game.play', {
+		url: '/play',
+		views: {
+			'@': {
+				//current game.html should be play.html
+				templateUrl: 'app/views/pages/game/play.html'
+			}
+		}
+	});
+
+	/*
 	$stateProvider.state('game', {
 		url: '/game',
 		views: {
 			'': {
-				templateUrl: 'app/views/pages/game/game.html',
+				templateUrl: 'app/views/pages/game/gameOld.html',
 			},
 			'rooms@game': {
-				templateUrl: 'app/views/pages/game/rooms.html',
+				templateUrl: 'app/views/pages/game/roomsOld.html',
 				controller: 'RoomsCtrl'
 			},
 			
 		}
 	});
+	*/
+	//}+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+
+	// +-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+
 	
 }]);
 
@@ -77,24 +139,3 @@ app.run(['$rootScope', '$state', '$stateParams', function($rootScope, $state, $s
 	$state.transitionTo('home');
 }]);
 */
-
-//Create the 'rooms' factory
-app.factory('rooms', [function() {
-	return {
-		currentRooms: [
-			{roomName: 'ABS'},
-			{roomName: 'CBN'},
-			{roomName: 'GMA'},
-		]
-	};
-}]);
-
-//Create the RoomsCtrl injecting the 'rooms' factory in it
-app.controller('RoomsCtrl', [
-'$scope',
-'rooms',
-function($scope, rooms) {
-	var vm = this;
-	$scope.theRooms = rooms.currentRooms;
-
-}]);

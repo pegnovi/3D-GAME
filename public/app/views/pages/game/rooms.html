@@ -1,13 +1,40 @@
 
 <div>
-	<div class="list-group" ng-repeat="room in RoomsCtrl.theRooms">
+	<!--
+	<div class="list-group" ng-repeat="room in RoomsCtrl.rooms">
 		<a class="list-group-item">
-			<div>{{room.roomName}}</div>		
+			<div>{{room}}</div>		
 		</a>
+	</div>
+	-->
+	
+	<!-- http://www.undefinednull.com/2014/08/11/a-brief-walk-through-of-the-ng-options-in-angularjs/ -->
+	<!-- https://github.com/angular/angular.js/wiki/Understanding-Scopes -->
+	<!--
+	<div>
+		<select size='5'>
+			<option ng-repeat="room in RoomsCtrl.rooms"> {{room.roomName}} || {{room.roomType}}
+		</select>
+	</div>
+	-->
+	<div>
+		<p> selected room is : {{selectedRoom}} </p>
+		<select size="5" ng-model="selectedRoom" ng-options="room.roomName + ' | ' + room.roomType for room in rooms"></select>
 	</div>
 
 	<div> 
-		<button class="btn"> Refresh </button>
-		<button class="btn"> Create Room </button>
+		<button class="btn" ng-click="sayRoom()"> Test </button>
+		<button class="btn" ng-click="getAllRooms()"> Refresh </button>
+		
+		<form ng-submit="createRoom()">
+			<input type="text" ng-model="nuRoomName"></input>
+			<select ng-model="nuRoomType">
+				<option ng-repeat="roomType in roomTypes"> {{roomType}} </option>
+			</select>
+			<input type="text" ng-model="nuRoomPassword"></input>
+			<button class="btn" type="submit"> Create Room </button>
+		</form>
+		
+		<button class="btn" ng-click="joinRoom()" ui-sref="game.roomLobby"> Join </button>
 	</div>
 </div>
