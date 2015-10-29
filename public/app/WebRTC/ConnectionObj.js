@@ -9,6 +9,9 @@ var ConnectionObj = function(targetID, commandSet, socketInterface) {
 	this.pc = null;
 	this.dataChannel = null;
 	
+	this.remoteDescSet = false;
+	this.iceCandidateQueue = [];
+	
 	var configuration = {
 		'iceServers': [
 			{'url':'stun:stun01.sipphone.com'},
@@ -52,7 +55,6 @@ var ConnectionObj = function(targetID, commandSet, socketInterface) {
 	this.pc = new PeerConnection(configuration);
 	var self = this;
 	
-	/*
 	this.pc.onicecandidate = function(event) {
 		
 		if(self.pc.remoteDescription == undefined || self.pc.remoteDescription == null) {
@@ -61,15 +63,18 @@ var ConnectionObj = function(targetID, commandSet, socketInterface) {
 		else {
 			console.log("!!!REMOTE IZ DEFINED!!!");
 		}
+		
 		if(event.candidate) {
+			console.log(event.candidate);
 			self.socketInterface.send("re-route", targetID, "iceCandidate", {candidate: event.candidate});
 		}
+		else {
+			console.log("!!! END OF CANDIDATES !!!");
+		}
 	};
-	*/
-	
 	
 	this.pc.onnegotiationneeded = function () {
-		console.log("ON NEGOTIATION NEEDED");
+		console.log("=== ON NEGOTIATION NEEDED ===");
 		//??
 		//sendOfferToGroupmates(gpsIDs);
 	};
@@ -82,55 +87,60 @@ var ConnectionObj = function(targetID, commandSet, socketInterface) {
 	
 };
 
-ConnectionObj.prototype.setOnIceCandidate = function() {
-	this.pc.onicecandidate = function(event) {
-		console.log("SENDING ICE CANDIDATE " + event.candidate);
-		if(self.pc.remoteDescription == undefined || self.pc.remoteDescription == null) {
-			console.log("!!!REMOTE UNDEFINED!!!");
-		}
-		else {
-			console.log("!!!REMOTE IZ DEFINED!!!");
-		}
-		if(event.candidate) {
-			self.socketInterface.send("re-route", targetID, "iceCandidate", {candidate: event.candidate});
-		}
-	};
-};
+
 ConnectionObj.prototype.makeOwnDataChannel = function() {
-	this.dataChannel = this.pc.createDataChannel("dataChannel");
+	var self = this;
+	
+	var dataChannelOptions = {
+		ordered: false, //no guaranteed delivery, unreliable but fast
+		maxRetransmitTime: 1000 //milliseconds
+	}
+	this.dataChannel = this.pc.createDataChannel("dataChannel", dataChannelOptions);
+	
 	this.setChannelEvents();
+
 };
 
-ConnectionObj.prototype.setChannelEvents = function() {
+ConnectionObj.prototype.getDataChannelOnMessageHandler = function(event) {
 	var self = this;
-	this.dataChannel.onmessage = function(event) {
+	return function(event) {
 		var data = JSON.parse(event.data);
-		data["dataChannel"] = this;
+		data["dataChannel"] = self;
 		console.log("received command: " + data.command);
 		console.log("received dataObj: ");
 		console.log(data.dataObj);
 
 		self.commandSetDataChannel.execute(data);
 	};
-	
+};
+
+ConnectionObj.prototype.setChannelEvents = function() {
+	var self = this;
+
 	this.dataChannel.onopen = function() {
-		console.log("channel open");
-		self.channelOpen = true;
+		
+		if(self.dataChannel.readyState === 'open') {
+			console.log("channel open");
+			self.channelOpen = true;
+			
+			
+		}
 	};
+	
 	this.dataChannel.onclose = function() {
 		console.log("channel close");
 		self.channelOpen = false;
 	};
+	
+	this.dataChannel.onmessage = this.getDataChannelOnMessageHandler();
 };
 
-ConnectionObj.prototype.setDataChannel = function(channel) {
-	this.dataChannel = channel;
-};
 
 ConnectionObj.prototype.addIceCandidateToPeerConnection = function(daIceCandidate) {
+
 	console.log("Adding Candidate: ");
 	console.log(daIceCandidate);
-	this.pc.addIceCandidate(new RTCIceCandidate(daIceCandidate), function() {alert("ICE success");}, function() {alert("ICE fail");});
+	this.pc.addIceCandidate(new RTCIceCandidate(daIceCandidate), function() {console.log("ICE add success");}, function() {console.log("ICE add fail");});
 };
 
 //{(((((((((( Initiator ))))))))))
