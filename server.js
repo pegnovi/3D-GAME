@@ -105,108 +105,63 @@ var groups = {}; //roomID : list of client ids
 
 
 socket.on("connection", function(client) {
+
 	console.log("client connected via socket!!!");
-	
 	console.log("client id = " + client.id);
-    client.name = "Unknown";
-    client.locked = true;
     
+	var serverSend = function(originatorID, targetID, data) {
+		data["originatorID"] = originatorID;
+		socket.to(targetID).emit("serverMessage", JSON.stringify(data));
+	};
 	
 	//?!
 	client.on("re-route", function(data) {
 		console.log("RE-ROUTING");
 		var parsedData = JSON.parse(data);
-
-		socket.to(parsedData.targetID).emit("serverMessage", data);
+		
+		parsedData["originatorID"] = client.id;
+		
+		//socket.to(parsedData["targetID"]).emit("serverMessage", JSON.stringify(parsedData));
+		serverSend(client.id, parsedData["targetID"], parsedData);
 
 	});
+	
+	
+	
 	var serverJobFuncs = {};
-	serverJobFuncs["id"] = function(data) {
-		client.emit("serverMessage", JSON.stringify({
-			originatorID: "server",
-			command: "id",
-			id: client.id
-		}));
+	
+	serverJobFuncs["joinRoom"] = function(data) {
+		client.room = data.roomID;
+	
+		if(groups[data.roomID] == undefined) {
+			//create new room
+			groups[data.roomID] = [];
+			
+		}
+		else {
+			/*
+			client.emit("serverMessage", JSON.stringify({
+				originatorID: "server",
+				command: "roomPeers",
+				groupmatesIDs: groups[data.roomID]
+			}));
+			*/
+			
+			serverSend("server", client.id, {
+				command: "roomPeers",
+				groupmatesIDs: groups[data.roomID]
+			});
+		}
+		
+		//push this client's id into room
+		groups[data.roomID].push(client.id);
 	};
 	client.on("serverJob", function(data) {
 		data = JSON.parse(data);
 		serverJobFuncs[data.command](data);
 	});
 	//?!
-	
- 
-    client.on("createid", function() {
-		console.log("SERVER CREATE ROOM ID!!!");
-        if(client.room) {
-            client.emit("createid", JSON.stringify({
-                id: client.room,
-            }));
-            return;
-        }
-        client.room = "";
 
-		//Ensure uniqueness of UUID
-        var UUID = getUUID();
-        while(groups[UUID]) {
-            UUID = getUUID();
-        }
-
-        client.room = UUID;
-        groups[UUID] = [];
-		groups[UUID].push(client);
-        client.name = "Host";
-
-        client.emit("createid", JSON.stringify({
-            id: UUID,
-        }));
-    });
-
-    client.on("setname", function(data) {
-        data = JSON.parse(data);
-        var result = false;
-        var message = "";
-
-        if(data.name.length < 3) {
-            message = "Name must be at least 3 characters long.";
-        } else if (data.name.length > 20) {
-        	message = "Name cannot be more than 20 characters long."
-        } else {
-            client.name = data.name;
-            result = true;
-            message = "Name is good."
-        }
-
-        client.emit("setname", JSON.stringify({
-			result: result,
-            error: message 
-        }));
-    });
-
-    client.on("togglelock", function() {
-        if(client.room) {
-            if(client.locked) {
-                client.locked = false;
-            } else
-                client.locked = true;
-
-            client.emit("toggledlock");
-        }
-    });
-
-    client.on("requestCanvasData", function() {
-    	socket.to(groups[client.room][0].id).emit("getCanvasData", JSON.stringify({
-			requesterID: client.id
-		}));
-    });
-
-	//&&!!&&
-	client.on("giveCanvasData", function(data) {
-		console.log("giveCanvasData");
-		data = JSON.parse(data);
-		socket.to(data.peerID).emit("HereIsCanvasData", JSON.stringify({
-			image: data.image,
-		}));
-	});
 	
     client.on("doesroomexist", function(data) {
         data = JSON.parse(data);
@@ -272,9 +227,17 @@ socket.on("connection", function(client) {
 			//tell all other clients in the group to delete this client
 			for(var i=0; i<groups[client.room].length; i++) {
 				console.log("HERE with " + groups[client.room][i].id);
-				socket.to(groups[client.room][i].id).emit("deleteMember", JSON.stringify({
-					memberToDelete: client.id
+				
+				/*
+				socket.to(groups[client.room][i].id).emit("deletePeer", JSON.stringify({
+					peerToDelete: client.id
 				}));
+				*/
+				
+				serverSend("server", groups[client.room][i].id, {
+					command: "deletePeer",
+					peerToDelete: client.id
+				});
 			}
 			
 			if(groups[client.room].length == 0) {

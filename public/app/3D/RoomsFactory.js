@@ -18,6 +18,8 @@ app.factory('roomsFactory', ['$http', function($http) {
 	obj.create = function(room) {
 		return $http.post('/room', room).success(function(data) {
 			obj.rooms.push(data);
+			
+
 		});
 	};
 	obj.get = function(id) {

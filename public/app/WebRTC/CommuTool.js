@@ -58,7 +58,6 @@ var CommuTool = function(socketInterface) {
 		console.log(data.answer);
 		console.log("Answer from peer: " + data.originatorID);
 		self.processReceivedAnswer(data.originatorID, data.answer, data.peerName);
-		showNameForm();
 	};
 	this.recvFuncs["iceCandidate"] = function(data) {
 		console.log("ICE Candidate update");
@@ -66,10 +65,6 @@ var CommuTool = function(socketInterface) {
 		self.addIceCandidateToPeer(data.originatorID, data.candidate);
 	};
 	this.recvFuncs["deletePeer"] = function(data) {
-		console.log("DELETING MEMBER " + data.peerToDelete);
-			$("#convo").append(">" + self.conObjs[data.peerToDelete].name + " has left!\n");
-		convoHasChanged();
-		
 		self.deletePeer(data.peerToDelete);
 	};
 		

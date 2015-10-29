@@ -1,4 +1,4 @@
-app.controller('RoomsCtrl', ['$scope', 'roomsFactory', function($scope, roomsFactory) {
+app.controller('RoomsCtrl', ['$scope', '$state', 'roomsFactory', function($scope, $state, roomsFactory) {
 	
 	console.log("In Rooms Controller");
 	
@@ -32,6 +32,7 @@ app.controller('RoomsCtrl', ['$scope', 'roomsFactory', function($scope, roomsFac
 			roomsFactory.create(new Room($scope.nuRoomName, $scope.nuRoomType, $scope.nuRoomPassword));
 			
 			$scope.resetNuRoomVars();
+	
 		}
 	};
 	

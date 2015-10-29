@@ -84,7 +84,7 @@ function($stateProvider, $urlRouterProvider) {
 		views: {
 			'@': {
 				templateUrl: 'app/views/pages/game/roomLobby.html',
-				controller: 'RoomsCtrl as RoomsCtrl',
+				controller: 'RoomLobbyCtrl as RoomLobbyCtrl',
 				resolve: {
 					
 					/*
@@ -96,6 +96,11 @@ function($stateProvider, $urlRouterProvider) {
 					
 					room: ['roomsFactory', function(roomsFactory) {
 						return roomsFactory.get(roomsFactory.chosenRoomID);
+					}],
+					
+					socketConn: ['roomsFactory', function(roomsFactory) {
+						socketInterface.socketConnect(io);
+						socketInterface.send("serverJob", "", "joinRoom", {roomID: roomsFactory.chosenRoomID})
 					}]
 					
 				}

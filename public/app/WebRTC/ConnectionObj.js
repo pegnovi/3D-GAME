@@ -51,7 +51,10 @@ var ConnectionObj = function(targetID, commandSet, socketInterface) {
 	//Create own PeerConnection 
 	this.pc = new PeerConnection(configuration);
 	var self = this;
+	
+	/*
 	this.pc.onicecandidate = function(event) {
+		
 		if(self.pc.remoteDescription == undefined || self.pc.remoteDescription == null) {
 			console.log("!!!REMOTE UNDEFINED!!!");
 		}
@@ -59,9 +62,12 @@ var ConnectionObj = function(targetID, commandSet, socketInterface) {
 			console.log("!!!REMOTE IZ DEFINED!!!");
 		}
 		if(event.candidate) {
-			self.socketInterface.send("re-route", id, targetID, "iceCandidate", {candidate: event.candidate});
+			self.socketInterface.send("re-route", targetID, "iceCandidate", {candidate: event.candidate});
 		}
 	};
+	*/
+	
+	
 	this.pc.onnegotiationneeded = function () {
 		console.log("ON NEGOTIATION NEEDED");
 		//??
@@ -76,6 +82,20 @@ var ConnectionObj = function(targetID, commandSet, socketInterface) {
 	
 };
 
+ConnectionObj.prototype.setOnIceCandidate = function() {
+	this.pc.onicecandidate = function(event) {
+		console.log("SENDING ICE CANDIDATE " + event.candidate);
+		if(self.pc.remoteDescription == undefined || self.pc.remoteDescription == null) {
+			console.log("!!!REMOTE UNDEFINED!!!");
+		}
+		else {
+			console.log("!!!REMOTE IZ DEFINED!!!");
+		}
+		if(event.candidate) {
+			self.socketInterface.send("re-route", targetID, "iceCandidate", {candidate: event.candidate});
+		}
+	};
+};
 ConnectionObj.prototype.makeOwnDataChannel = function() {
 	this.dataChannel = this.pc.createDataChannel("dataChannel");
 	this.setChannelEvents();
@@ -110,7 +130,7 @@ ConnectionObj.prototype.setDataChannel = function(channel) {
 ConnectionObj.prototype.addIceCandidateToPeerConnection = function(daIceCandidate) {
 	console.log("Adding Candidate: ");
 	console.log(daIceCandidate);
-	this.pc.addIceCandidate(new RTCIceCandidate(daIceCandidate));
+	this.pc.addIceCandidate(new RTCIceCandidate(daIceCandidate), function() {alert("ICE success");}, function() {alert("ICE fail");});
 };
 
 //{(((((((((( Initiator ))))))))))
@@ -124,8 +144,8 @@ ConnectionObj.prototype.createOfferToPeerConnection = function(peerID) {
 			function() {
 				//send the offer to a server to be forwarded to the friend you're calling
 				console.log("SENDING OFFER");
-				self.socketInterface.send("re-route", id, peerID, "offerFromPeer", {offer: offer});
-					
+				self.socketInterface.send("re-route", peerID, "offerFromPeer", {offer: offer});
+								
 			}, error);
 	}, error);
 };
@@ -154,7 +174,7 @@ ConnectionObj.prototype.createAnswer = function(offererID) {
 			//https://github.com/ESTOS/strophe.jingle/issues/35
 			//send the answer to a server to be forwarded back to the caller
 			console.log("SENDING ANSWER");
-			self.socketInterface.send("re-route", id, offererID, "answerFromPeer", {peerName: self.name, answer: answer});
+			self.socketInterface.send("re-route", offererID, "answerFromPeer", {peerName: self.name, answer: answer});
 					
 		}, error);
 	}, error);
