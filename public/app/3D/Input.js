@@ -11,8 +11,11 @@ function Input(renderer, targetThing, camera) {
 	this.mouseMovX = 0;
 	this.mouseMovY = 0;
 	
+	this.prevLeftClick = false;
 	this.leftClick = false;
+	this.prevMiddleClick = false;
 	this.middleClick = false;
+	this.prevRightClick = false;
 	this.rightClick = false;
 	this.scrollVal = 0;
 	
@@ -77,6 +80,7 @@ function Input(renderer, targetThing, camera) {
 			console.log('In-Game mouseup');
 			if(event.button == 0) {
 				self.leftClick = false;
+				
 			}
 			if(event.button == 1) {
 				self.middleClick = false;

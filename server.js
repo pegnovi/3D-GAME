@@ -100,9 +100,9 @@ server.listen(3000); //use this if running locally
 //server.listen(80); //use this if uploading to nodejitsu
 //server.listen(process.env.OPENSHIFT_NODEJS_PORT, process.env.OPENSHIFT_NODEJS_IP); //use this if deploying to openshift
 
-//Represents a group of clients in the same chatroom
+//Represents a group of clients in the same room
 var groups = {}; //roomID : list of client ids
-
+//roomID: {{peerID: {readyState}}, ...}
 
 socket.on("connection", function(client) {
 
@@ -135,26 +135,65 @@ socket.on("connection", function(client) {
 	
 		if(groups[data.roomID] == undefined) {
 			//create new room
-			groups[data.roomID] = [];
+			groups[data.roomID] = {};
 			
 		}
 		else {
-			/*
-			client.emit("serverMessage", JSON.stringify({
-				originatorID: "server",
-				command: "roomPeers",
-				groupmatesIDs: groups[data.roomID]
-			}));
-			*/
-			
+
+			//Send peer IDs
+			var peerIDs = [];
+			//key is the peer's id
+			for(var key in groups[data.roomID]) {
+				if(groups[data.roomID].hasOwnProperty(key)) {
+					peerIDs.push(key);
+				}
+			}
 			serverSend("server", client.id, {
 				command: "roomPeers",
-				groupmatesIDs: groups[data.roomID]
+				groupmatesIDs: peerIDs
+			});
+			
+			
+			//Send peer ready states
+			var peerRdyStts = {};
+			for(var key in groups[data.roomID]) {
+				if(groups[data.roomID].hasOwnProperty(key)) {
+					peerRdyStts[key] = groups[data.roomID][key];
+				}
+			}
+			serverSend("server", client.id, {
+				command: "peerReadyStates",
+				peerReadyStates: peerRdyStts
 			});
 		}
 		
 		//push this client's id into room
-		groups[data.roomID].push(client.id);
+		groups[data.roomID][client.id] = {readyState: false};
+	};
+	serverJobFuncs["updateReadyState"] = function(data) {
+
+		//update server on client readyState
+		groups[data.roomID][client.id].readyState = data.readyState;
+		
+		//broadcast readyState to group
+		for(var peer in groups[data.roomID]) {
+			if(groups[data.roomID].hasOwnProperty(peer)) {
+				if(peer != client.id) {
+					serverSend("server", peer, {
+						command: "updatePeerReadyState",
+						peerID: client.id,
+						readyState: data.readyState
+					});
+				}
+			}
+		}
+		
+		//check if all members are ready (send countdown signal)
+		if(allReady(groups[data.roomID])) {
+			actionToGroup(groups[data.roomID], function(peer, peerData) {
+				serverSend("server", peer, {command: "countdown"});
+			});
+		}
 	};
 	client.on("serverJob", function(data) {
 		data = JSON.parse(data);
@@ -162,6 +201,33 @@ socket.on("connection", function(client) {
 	});
 	//?!
 
+	var actionToGroup = function(group, action) {
+		for(var peer in group) {
+			if(group.hasOwnProperty(peer)) {
+				action(peer, group[peer]);
+			}
+		}
+	};
+	var allReady = function(group) {
+		for(var peer in group) {
+			if(group.hasOwnProperty(peer)) {
+				if(group[peer].readyState == false) {
+					return false;
+				}
+			}
+		}
+		return true;
+	};
+	var groupCount = function(group) {
+		var count = 0;
+		for(var peer in group) {
+			if(group.hasOwnProperty(peer)) {
+				count += 1;
+			}
+		}
+		return count;
+	};
+	
 	
     client.on("doesroomexist", function(data) {
         data = JSON.parse(data);
@@ -221,32 +287,39 @@ socket.on("connection", function(client) {
 			console.log("deleting client " + client.id + " from group");
 
 			//delete client from group
-			var index = groups[client.room].indexOf(client);
-			groups[client.room].splice(index,1);
+			delete groups[client.room][client.id]
 			
 			//tell all other clients in the group to delete this client
-			for(var i=0; i<groups[client.room].length; i++) {
-				console.log("HERE with " + groups[client.room][i].id);
+			for(var peerID in groups[client.room]) {
+				if(groups[client.room].hasOwnProperty(peerID)) {
 				
-				/*
-				socket.to(groups[client.room][i].id).emit("deletePeer", JSON.stringify({
-					peerToDelete: client.id
-				}));
-				*/
-				
-				serverSend("server", groups[client.room][i].id, {
-					command: "deletePeer",
-					peerToDelete: client.id
-				});
+					console.log("HERE with " + peerID);
+					
+					serverSend("server", peerID, {
+						command: "deletePeer",
+						peerToDelete: client.id
+					});
+				}
 			}
 			
-			if(groups[client.room].length == 0) {
+			if(isEmpty(groups[client.room])) {
 				console.log("group member count == 0 so deleting entire group");
 				delete groups[client.room];
 			}
+			
 			delete client;
         }
     });
+	
+	//http://stackoverflow.com/questions/3426979/javascript-checking-if-an-object-has-no-properties-or-if-a-map-associative-arra
+	function isEmpty(map) {
+		for(var key in map) {
+			if (map.hasOwnProperty(key)) {
+				return false;
+			}
+		}
+		return true;
+	}
 	
 });
 

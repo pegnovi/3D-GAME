@@ -1,7 +1,30 @@
 <div>
-
+	
+	<form ng-submit="sendMessage()">
+		<textarea id="chat-messages" type="text" ng-model="msgs" readonly></textarea>
+		<div>
+			<input id="chat-input" type="text" ng-model="msg" placeholder="Type your message"></input>
+			<button class="btn" type="submit">Send Message</button>
+		</div>
+	</form>
+	
 	<button class="btn" ng-click="getRoomID()"> Test </button>
 
-	<button class="btn" ui-sref="game.play"> READY </button>
+	<button class="btn" ng-click="" ui-sref="game.play"> READY </button>
 
+	<div id="countdown"></div>
+	
+	<div class="container">
+		
+		<div class="row">
+			
+				<div class="col-xs-1">
+					<!--<button ng-click="toggleReadyState()" ng-style="{'background-color': readyStateColor}">Ready</button>-->
+					<button ng-click="toggleReadyState()" ng-class="{onReady:readyState, onUnready:!readyState}">TEST READY</button>
+		
+					<button ng-repeat="(key, value) in rdyStates" ng-class="{onReady:value, onUnready:!value}">{{key}} : {{value}} ==> Redy</button>
+				</div>
+		</div>
+	</div>
+	
 </div>

@@ -2,15 +2,23 @@
 //must have commandFunction(data)
 
 function ThingController(targetThing, camera) {
-	
+
 	var self = this;
 
 	this.camOrientation = new THREE.Quaternion(0,0,0,1);
 	this.camera = camera;
 	
 	this.boostMode = false;
-	this.meleeBoostMode = false;
 	this.speed = 100;
+	
+	
+	this.meleeButtonJustPressed = false;
+	this.meleeButtonJustReleased = true;
+	this.meleeBoostMode = false;
+	this.meleeBoostCapacity = 1000;
+	this.meleeDashSpeed = 120;
+
+	
 	
 	this.targetThing = targetThing;
 
@@ -26,7 +34,8 @@ function ThingController(targetThing, camera) {
 	this.commandFunction = function(data) {
 		self.processUserInput(data.delta, data.now, 
 							  data.input.mouseMovX, data.input.mouseMovY,
-							  data.input.leftClick, data.input.rightClick,
+							  data.input.leftClick, 
+							  data.input.rightClick,
 							  data.input.scrollVall, data.input.keyboard);
 	};
 };
@@ -57,14 +66,14 @@ ThingController.prototype.changeBoostMode = function(boostModeOn) {
 
 ThingController.prototype.checkBoostMode = function(now, userActed) {
 	//console.log(this.targetThing.speed);
-
+	
 	if(userActed == true) {
 		
 		var tDiff = now - this.keyPressedTime;
 		
 		if(tDiff > 0.07 && tDiff < 0.16 && this.prevKeyPressed == this.keyPressed) {
 			console.log("boost");
-			this.targetThing.changeBoostMode(true);
+			this.changeBoostMode(true);
 		}
 	
 		this.prevKeyPressed = this.keyPressed;
@@ -76,6 +85,66 @@ ThingController.prototype.checkBoostMode = function(now, userActed) {
 
 	
 };	
+
+ThingController.prototype.checkMeleeBoostMode = function(leftClick, delta) {
+	
+	if(leftClick == true) {
+		if(this.meleeButtonJustPressed == false) {
+			this.meleeButtonJustPressed = true;
+			this.meleeBoostMode = true;	
+			this.speed = this.meleeDashSpeed;
+			
+			this.meleeButtonJustReleased = true;
+		}
+		else {
+			console.log("=>=> Melee Boosting =>=>")
+		
+			this.targetThing.move(this.targetThing.forward, this.targetThing.speed*delta);
+			//userActed = true;
+		
+			this.meleeBoostCapacity -= 20;
+			
+			if(this.meleeBoostCapacity <= 0) {
+				//end melee mode
+				this.meleeBoostMode = false;
+			}
+		}
+	}
+	//melee boost mode ends
+	else { //leftClick == false
+		if(this.meleeButtonJustReleased == true) {
+			console.log("MELEE JUST RELEASED!!!");
+			this.meleeButtonJustReleased = false;
+			this.meleeBoostMode = false;
+			this.meleeBoostCapacity = 1000;
+			this.speed = 100;
+			
+			this.meleeButtonJustPressed = false;
+			
+			/*
+			//melee boost just ended
+			if( == true) {
+				console.log("MELEE START!!!");
+				//start melee attack & animation
+				//.
+				//.
+				//.	
+			}
+			*/
+		}
+
+		
+	}
+
+	
+	if(this.meleeBoostMode == true) {
+	}
+	
+	if(this.meleeBoostMode == false) {
+		
+		
+	}
+}
 
 //called in the context of input class (so this won't work the way we want it to
 /*
@@ -96,18 +165,21 @@ ThingController.prototype.processUserInput = function(delta, now, mouseMovX, mou
 	
 	var mouseMoved = false;
 	var userActed = false;
-	//this.keyPressed = ' ';
 	
+	
+	//Cam Rotation
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	//{~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	//Ground
 	if(this.mode == 1) {
 	
 		if(mouseMovX != 0) {
-			//this.targetThing.rotate(this.targetThing.up, -mouseMovX*0.1, false);
+			this.targetThing.rotate(this.targetThing.up, -mouseMovX*0.1, false);
 			this.rotateCam(this.targetThing.up, -mouseMovX*0.1);
 			mouseMoved = true;
 		}
 		if(mouseMovY != 0) {
-			//this.targetThing.rotate(this.targetThing.right, -mouseMovY*0.1, false);
+			this.targetThing.rotate(this.targetThing.right, -mouseMovY*0.1, false);
 			this.rotateCam(this.targetThing.right, -mouseMovY*0.1);
 			mouseMoved = true;
 		}
@@ -127,13 +199,17 @@ ThingController.prototype.processUserInput = function(delta, now, mouseMovX, mou
 			mouseMoved = true;
 		}
 	}
+	//}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	
-	//General
+	//General Movement
+	// ->->->->->->->->->->->->->->->->->->->->
+	//{->->->->->->->->->->->->->->->->->->->->
 	//console.log("keyboard = "); console.log(keyboard);
 	//console.log("delta = " + delta);
 	if( kb.pressed('d') ) {
 		this.keyPressed = 'd';
-		this.targetThing.move(this.targetThing.right, this.targetThing.speed*delta);
+		this.targetThing.move(this.targetThing.right, this.speed*delta);
 		userActed = true;
 	}
 	else if( kb.pressed('a') ) {
@@ -141,13 +217,13 @@ ThingController.prototype.processUserInput = function(delta, now, mouseMovX, mou
 		var moveVec = new THREE.Vector3();
 		moveVec.copy(this.targetThing.right);
 		moveVec.negate();
-		this.targetThing.move(moveVec, this.targetThing.speed*delta);
+		this.targetThing.move(moveVec, this.speed*delta);
 		userActed = true;
 	}
 	
 	if( kb.pressed('w') ) {
 		this.keyPressed = 'w';
-		this.targetThing.move(this.targetThing.forward, this.targetThing.speed*delta);
+		this.targetThing.move(this.targetThing.forward, this.speed*delta);
 		userActed = true;
 	}
 	else if( kb.pressed('s') ) {
@@ -155,14 +231,14 @@ ThingController.prototype.processUserInput = function(delta, now, mouseMovX, mou
 		var moveVec = new THREE.Vector3();
 		moveVec.copy(this.targetThing.forward);
 		moveVec.negate();
-		this.targetThing.move(moveVec, this.targetThing.speed*delta);
+		this.targetThing.move(moveVec, this.speed*delta);
 		userActed = true;
 	}
 		
 	
 	if( kb.pressed('space') ) {
 		this.keyPressed = 'space';
-		this.targetThing.move(this.targetThing.up, this.targetThing.speed*delta);
+		this.targetThing.move(this.targetThing.up, this.speed*delta);
 		userActed = true;
 	}
 	else if( kb.pressed('x') ) {
@@ -170,18 +246,28 @@ ThingController.prototype.processUserInput = function(delta, now, mouseMovX, mou
 		var moveVec = new THREE.Vector3();
 		moveVec.copy(this.targetThing.up);
 		moveVec.negate();
-		this.targetThing.move(moveVec, this.targetThing.speed*delta);
+		this.targetThing.move(moveVec, this.speed*delta);
 		userActed = true;
 	}
+	//}->->->->->->->->->->->->->->->->->->->->
+	// ->->->->->->->->->->->->->->->->->->->->
+	
 	
 	//Boosting
 	//==+>==+>==+>==+>==+>==+>==+>==+>==+>==+>
 	this.checkBoostMode(now, userActed);
 	//==+>==+>==+>==+>==+>==+>==+>==+>==+>==+>
 	
+	//Melee Boosting
+	//==+>==+>==+>==+>==+>==+>==+>==+>==+>==+>
+	this.checkMeleeBoostMode(leftClick, delta);
+	//==+>==+>==+>==+>==+>==+>==+>==+>==+>==+>
+	
+	
 	if(userActed == true || mouseMoved == true) {
 		this.updateCamera();
 	}
+	
 		
 };
 

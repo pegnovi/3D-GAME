@@ -7,7 +7,11 @@ var socket = null;
 var socketInterface = new SocketInterface();
 var commuTool = new CommuTool(socketInterface);
 
+var peersGameState = new PeersGameState();
 
+//(((((((((((((((())))))))))))))))
+//(((((((((( RECV FUNCS ))))))))))
+//(((((((((((((((())))))))))))))))
 var recvFuncs = {};
 recvFuncs["roomPeers"] = function(data) {
 	//Create ConnectionObj for each roomPeer
@@ -16,6 +20,21 @@ recvFuncs["roomPeers"] = function(data) {
 	//Send offers to RoomPeers
 	commuTool.sendOfferToGroupmates(data.groupmatesIDs);
 };
+recvFuncs["peerReadyStates"] = function(data) {
+	console.log("PEER READY STATES");
+	console.log(data.peerReadyStates);
+	for(var key in data.peerReadyStates) {
+		if (data.peerReadyStates.hasOwnProperty(key)) {
+			console.log("peerID: " + key + " is READY: " + data.peerReadyStates[key].readyState);
+			peersGameState.addPeer(key, data.peerReadyStates[key].readyState);
+		}
+	}
+};
+/*
+recvFuncs["updatePeerReadyState"] = function(data) {
+	peersGameState.setReadyState(data.peerID, data.readyState);
+};
+*/
 socketInterface.addRecvFuncs(recvFuncs);
 
 $(document).ready(function() {

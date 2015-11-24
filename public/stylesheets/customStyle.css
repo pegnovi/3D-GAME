@@ -1,0 +1,6 @@
+button.onReady {
+	background-color: green;
+}
+button.onUnready {
+	background-color: red;
+}

@@ -97,9 +97,11 @@ Thing.prototype.rotate = function(axis, angleDegrees, updateUpAxis) {
 
 
 Thing.prototype.move = function(axis, amt) {
+
 	var moveVec = new THREE.Vector3();
 	moveVec.copy(axis);
 	moveVec.multiplyScalar(amt);
+	
 	this.model.position.add(moveVec);
 };
 

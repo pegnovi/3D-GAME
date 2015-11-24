@@ -91,11 +91,14 @@ var ConnectionObj = function(targetID, commandSet, socketInterface) {
 ConnectionObj.prototype.makeOwnDataChannel = function() {
 	var self = this;
 	
+	//this breaks shit?
+	/*
 	var dataChannelOptions = {
 		ordered: false, //no guaranteed delivery, unreliable but fast
 		maxRetransmitTime: 1000 //milliseconds
 	}
-	this.dataChannel = this.pc.createDataChannel("dataChannel", dataChannelOptions);
+	*/
+	this.dataChannel = this.pc.createDataChannel("dataChannel");
 	
 	this.setChannelEvents();
 

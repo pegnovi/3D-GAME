@@ -98,9 +98,17 @@ function($stateProvider, $urlRouterProvider) {
 						return roomsFactory.get(roomsFactory.chosenRoomID);
 					}],
 					
-					socketConn: ['roomsFactory', function(roomsFactory) {
-						socketInterface.socketConnect(io);
-						socketInterface.send("serverJob", "", "joinRoom", {roomID: roomsFactory.chosenRoomID})
+					socketConn: ['roomsFactory', 'networkFactory', function(roomsFactory, networkFactory) {
+						if(networkFactory.socketInterface.socket == null) {
+							networkFactory.socketInterface.socketConnect(io);
+							networkFactory.socketInterface.send("serverJob", "", "joinRoom", {roomID: roomsFactory.chosenRoomID});
+
+						}
+						
+						//broadcast (re-route?) signal for ready state
+						networkFactory.peersGameState.setReadyState("own", false);
+						networkFactory.socketInterface.send("serverJob", "", "updateReadyState", {roomID: roomsFactory.chosenRoomID, readyState: false});
+						
 					}]
 					
 				}
@@ -111,7 +119,7 @@ function($stateProvider, $urlRouterProvider) {
 		url: '/play',
 		views: {
 			'@': {
-				//current game.html should be play.html
+				controller: 'RoomPlayCtrl as RoomPlayCtrl',			
 				templateUrl: 'app/views/pages/game/play.html'
 			}
 		}

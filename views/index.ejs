@@ -8,6 +8,7 @@
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.15/angular-ui-router.js"></script>
 			
 		<!-- JQuery -->	
+		<!--<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>-->
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
 
 		<!-- Bootstrap -->
@@ -17,6 +18,16 @@
 		<style> .glyphicon-thumbs-up { cursor:pointer } </style>
 		<style> .myClickableThingy { cursor: pointer; } </style>
 
+		<link rel="stylesheet" href="stylesheets/customStyle.css">
+		
+		
+		<!-- Timers -->
+		<link rel="stylesheet" href="app/3D/libs/FlipClock-master/compiled/flipclock.css">
+		<script src="app/3D/libs/FlipClock-master/compiled/flipclock.js"></script>
+		
+		<script src="app/3D/libs/tock-master/tock.js"></script>
+		
+		
 		<!-- Three.js -->
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r71/three.js"></script>
 		<script src="app/3D/libs/ColladaLoader.js"></script>
@@ -38,6 +49,10 @@
 		<!-- socket.io -->
 		<script src="/socket.io/socket.io.js"></script>
 		
+		
+		<script src="app/3D/PeersGameState.js"></script>
+		
+		
 		<!-- Networking WebRTC wrapper -->
 		<script src="app/WebRTC/SocketInterface.js"></script>
 		<script src="app/WebRTC/ConnectionObj.js"></script>
@@ -45,7 +60,6 @@
 		<script src="app/WebRTC/NetworkingGlobals.js"></script>
 		
 		
-
 		
 		<script src="app/3D/3DGlobals.js"></script>
 		<script src="app/3D/Thing.js"></script>
@@ -60,9 +74,11 @@
 		<!-- Javascript -->
 		<script src="app/angularApp.js"></script>
 		<script src="app/3D/Room.js"></script>
-		<script src="app/3D/RoomsFactory.js"></script>
-		<script src="app/3D/RoomsController.js"></script>
-		<script src="app/3D/RoomLobbyController.js"></script>
+		<script src="app/services/RoomsFactory.js"></script>
+		<script src="app/services/NetworkFactory.js"></script>
+		<script src="app/controllers/RoomsController.js"></script>
+		<script src="app/controllers/RoomLobbyController.js"></script>
+		<script src="app/controllers/RoomPlayController.js"></script>
 		<script src="app/customDirectives.js"></script>
 		
 	</head>
@@ -97,6 +113,11 @@
 		
 		<hello-world></hello-world>
 
+		<!-- QuickTest 
+		<script>
+		</script>
+		-->
+		
 	</body>
 </html>
 
