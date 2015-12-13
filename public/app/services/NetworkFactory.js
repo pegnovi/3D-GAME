@@ -2,8 +2,8 @@
 app.factory('networkFactory', ['$http', function($http) {
 
 	var obj = {};
-	obj.socketInterface = socketInterface;
-	obj.commuTool = commuTool;
+
+	obj.networkInterface = networkInterface;
 	obj.peersGameState = peersGameState;
 	
 	return obj;

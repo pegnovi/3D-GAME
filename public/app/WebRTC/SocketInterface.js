@@ -1,7 +1,24 @@
+//NetworkInterface
+//must implement:
+//	connect(data) method
+//	send(data) method
+
 var SocketInterface = function () {
 	this.socket = null;
 	this.recvCommands = new CommandSet();
 
+};
+
+SocketInterface.prototype.connect = function(data) {
+	console.log("socket connecting...");
+
+	//this.socket = data.io.connect("p2pChatAndDraw.jit.su:80"); //use this if uploading to nodejitsu
+	//this.socket = data.io.connect("http://nodejswebrtc-pegtest.rhcloud.com:8000/", {'forceNew':true, 'sync disconnect on unload': true });
+	this.socket = data.io.connect("127.0.0.1:3000", {'sync disconnect on unload': true }); //use this if running locally
+	
+	console.log("socket connected!!!");
+	
+	this.setRecvProcessing();
 };
 
 SocketInterface.prototype.socketConnect = function(io) {
@@ -45,6 +62,9 @@ SocketInterface.prototype.setRecvProcessing = function() {
 SocketInterface.prototype.addRecvFuncs = function(nuRecvFuncs) {
 	this.recvCommands.addCommandFuncs(nuRecvFuncs);
 };
+SocketInterface.prototype.addRecvFunc = function(commandName, nuRecvFunc) {
+	this.recvCommands.addCommandFunc(commandName, nuRecvFunc);
+};
 
 //Message Format:
 //targetID
@@ -60,5 +80,9 @@ SocketInterface.prototype.send = function(serverAction, targetID, command, data)
 	
 	this.socket.emit(serverAction, JSON.stringify(data));
 	
+};
+
+SocketInterface.prototype.sendI = function(data) {
+	this.socket.emit(data["serverAction"], JSON.stringify(data));
 };
 

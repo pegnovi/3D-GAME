@@ -1,3 +1,8 @@
+//NetworkInterface
+//must implement:
+//	connect(data) method
+//	send(data) method
+
 //Communication Tool assuming Mesh Network between peers
 var CommuTool = function(socketInterface) {
 	this.socketInterface = socketInterface;
@@ -75,11 +80,23 @@ var CommuTool = function(socketInterface) {
 	
 };
 
+CommuTool.prototype.connect = function(data) {
+	this.socketInterface.send("serverJob", "", "joinRoom", {roomID: data.chosenRoomID});
+};
+
 //Both
 CommuTool.prototype.addIceCandidateToPeer = function(peerID, iceCandidate) {
 	if(this.conObjs[peerID] != undefined) {
 		this.conObjs[peerID].addIceCandidateToPeerConnection(iceCandidate);
 	}
+};
+
+//can add receive functions to recvFuncs from many different scopes
+CommuTool.prototype.addRecvFuncs = function(nuRecvFuncs) {
+	this.commandSetDataChannels.addCommandFuncs(nuRecvFuncs);
+};
+CommuTool.prototype.addRecvFunc = function(commandName, nuRecvFunc) {
+	this.commandSetDataChannels.addCommandFunc(commandName, nuRecvFunc);
 };
 
 //{(((((((((( Initiator ))))))))))
@@ -159,5 +176,8 @@ CommuTool.prototype.findConObj = function(dataChannel) {
 	return null;
 };
 
+CommuTool.prototype.sendI = function(data) {
+	this.sendToGroup(data["command"], data);
+};
 
 

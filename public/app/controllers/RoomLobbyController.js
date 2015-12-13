@@ -12,12 +12,12 @@ function($scope, $state, roomsFactory, networkFactory) {
 	$scope.readyState = false;
 	$scope.readyStateColor;
 	
-	
-	networkFactory.commuTool.commandSetDataChannels.addCommandFunc("msg", function(data) {
+	//DataChannel command funcs
+	networkFactory.networkInterface.addRecvFunc("webRTC", "msg", function(data) {
 		$scope.appendMessageWithApply(data.dataObj.chatMessage);
 	});
 	
-	
+	//SocketInterface recv funcs
 	var recvFuncs = {};
 	recvFuncs["updatePeerReadyState"] = function(data) {
 		peersGameState.setReadyState(data.peerID, data.readyState);
@@ -55,15 +55,14 @@ function($scope, $state, roomsFactory, networkFactory) {
 		
 		clock.start();
 	};
-	networkFactory.socketInterface.addRecvFuncs(recvFuncs);
-	
+	networkFactory.networkInterface.addRecvFuncs("webSocket", recvFuncs);
 
 	$scope.sendMessage = function() {
 		console.log("sending = " + $scope.msg);
 		
-		console.log(networkFactory.commuTool.conObjs);
+		console.log(networkFactory.networkInterface.networks["webRTC"].conObjs);
 		
-		networkFactory.commuTool.sendToGroup("msg", {chatMessage: $scope.msg});
+		networkFactory.networkInterface.send("webRTC",{command:"msg", chatMessage:$scope.msg});
 		
 		$scope.appendMessage($scope.msg);
 		
@@ -98,7 +97,8 @@ function($scope, $state, roomsFactory, networkFactory) {
 		
 		networkFactory.peersGameState.setReadyState("own", $scope.readyState);
 		
-		networkFactory.socketInterface.send("serverJob", "", "updateReadyState", {roomID: roomsFactory.chosenRoomID, readyState: $scope.readyState});
+		networkFactory.networkInterface.send("webSocket", {serverAction:"serverJob", targetID:"", command:"updateReadyState", roomID:roomsFactory.chosenRoomID, readyState:$scope.readyState});
+		
 	};
 	
 	

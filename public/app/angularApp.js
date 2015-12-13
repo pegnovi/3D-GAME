@@ -99,15 +99,16 @@ function($stateProvider, $urlRouterProvider) {
 					}],
 					
 					socketConn: ['roomsFactory', 'networkFactory', function(roomsFactory, networkFactory) {
-						if(networkFactory.socketInterface.socket == null) {
-							networkFactory.socketInterface.socketConnect(io);
-							networkFactory.socketInterface.send("serverJob", "", "joinRoom", {roomID: roomsFactory.chosenRoomID});
+						if(networkFactory.networkInterface.networks["webSocket"].socket == null) {
+							networkFactory.networkInterface.connect("webSocket", {io:io});
+							networkFactory.networkInterface.send("webSocket", {serverAction:"serverJob", targetID:"", command:"joinRoom", roomID: roomsFactory.chosenRoomID});
 
 						}
 						
+						
 						//broadcast (re-route?) signal for ready state
 						networkFactory.peersGameState.setReadyState("own", false);
-						networkFactory.socketInterface.send("serverJob", "", "updateReadyState", {roomID: roomsFactory.chosenRoomID, readyState: false});
+						networkFactory.networkInterface.send("webSocket", {serverAction:"serverJob", targetID:"", command:"updateReadyState", roomID:roomsFactory.chosenRoomID, readyState:false});
 						
 					}]
 					
