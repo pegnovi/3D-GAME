@@ -45,7 +45,7 @@ function($stateProvider, $urlRouterProvider) {
 	});
 	
 	$stateProvider.state('about.gameplay', {
-		url: '/about/gameplay',
+		url: '/gameplay',
 		views: {
 			'@': {
 				templateUrl: 'app/views/pages/about/gameplay.html'

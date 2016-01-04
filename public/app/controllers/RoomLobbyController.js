@@ -1,41 +1,80 @@
 app.controller('RoomLobbyCtrl', ['$scope', '$state', 'roomsFactory', 'networkFactory',
 function($scope, $state, roomsFactory, networkFactory) {
 	
-	console.log("In Room Lobby Controller");
-	console.log(networkFactory.peersGameState.readyStates);
+	logger.log("In Room Lobby Controller");
+	logger.log(networkFactory.peersGameState.readyStates);
 	
+	// === RoomLobbyController vars === 
 	$scope.rdyStates = networkFactory.peersGameState.readyStates;
-	
 	$scope.msgs = "";
 	$scope.msg = "";
-	
 	$scope.readyState = false;
 	$scope.readyStateColor;
 	
-	//DataChannel command funcs
+	// === RoomLobbyController functions === 
+	$scope.sendMessage = function() {
+		logger.log("sending = " + $scope.msg);
+		logger.log(networkFactory.networkInterface.networks["webRTC"].conObjs);
+		
+		networkFactory.networkInterface.send("webRTC",{command:"msg", chatMessage:$scope.msg});
+		$scope.appendMessage($scope.msg);
+		$scope.msg = "";
+	};
+	
+	$scope.appendMessage = function(theMessage) {
+		$scope.msgs = $scope.msgs + "\n" + theMessage;
+	};
+	
+	//http://jimhoskins.com/2012/12/17/angularjs-and-apply.html
+	$scope.appendMessageWithApply = function(theMessage) {
+		$scope.$apply(function() {
+			$scope.appendMessage(theMessage);
+		});
+	};
+	
+	$scope.getRoomID = function() {
+		console.log(roomsFactory.chosenRoomID);
+	};
+	
+	$scope.toggleReadyState = function() {
+	
+		logger.log("Toggling readyState to " + !$scope.readyState);
+	
+		$scope.readyState = !$scope.readyState;
+		if($scope.readyState) { $scope.readyStateColor = 'green'; }
+		else { $scope.readyStateColor = 'red'; }
+		
+		networkFactory.peersGameState.setReadyState("own", $scope.readyState);
+		
+		networkFactory.networkInterface.send("webSocket", {serverAction:"serverJob", targetID:"", command:"updateReadyState", roomID:roomsFactory.chosenRoomID, readyState:$scope.readyState});
+	};
+	
+	
+	// +++ DataChannel recv funcs +++
 	networkFactory.networkInterface.addRecvFunc("webRTC", "msg", function(data) {
+		logger.log("received msg");
 		$scope.appendMessageWithApply(data.dataObj.chatMessage);
 	});
 	
-	//SocketInterface recv funcs
+	// +++ SocketInterface recv funcs +++
 	var recvFuncs = {};
 	recvFuncs["updatePeerReadyState"] = function(data) {
 		peersGameState.setReadyState(data.peerID, data.readyState);
 		$scope.$apply();
 	};
 	recvFuncs["peerReadyStates"] = function(data) {
-		console.log("PEER READY STATES");
-		console.log(data.peerReadyStates);
+		logger.log("PEER READY STATES");
+		logger.log(data.peerReadyStates);
 		for(var key in data.peerReadyStates) {
 			if (data.peerReadyStates.hasOwnProperty(key)) {
-				console.log("peerID: " + key + " is READY: " + data.peerReadyStates[key].readyState);
+				logger.log("peerID: " + key + " is READY: " + data.peerReadyStates[key].readyState);
 				networkFactory.peersGameState.addPeer(key, data.peerReadyStates[key].readyState);
 			}
 		}
 		$scope.$apply();
 	};
 	recvFuncs["countdown"] = function(data) {
-		console.log("In Countdown");
+		logger.log("In Countdown");
 		var clock = new FlipClock($('#countdown'), 10, {
 			// ... your options here
 			clockFace: 'MinuteCounter',
@@ -57,49 +96,7 @@ function($scope, $state, roomsFactory, networkFactory) {
 	};
 	networkFactory.networkInterface.addRecvFuncs("webSocket", recvFuncs);
 
-	$scope.sendMessage = function() {
-		console.log("sending = " + $scope.msg);
-		
-		console.log(networkFactory.networkInterface.networks["webRTC"].conObjs);
-		
-		networkFactory.networkInterface.send("webRTC",{command:"msg", chatMessage:$scope.msg});
-		
-		$scope.appendMessage($scope.msg);
-		
-		$scope.msg = "";
-		
-	};
 	
-	$scope.appendMessage = function(theMessage) {
-		$scope.msgs = $scope.msgs + "\n" + theMessage;
-	};
-	
-	//http://jimhoskins.com/2012/12/17/angularjs-and-apply.html
-	$scope.appendMessageWithApply = function(theMessage) {
-		$scope.$apply(function() {
-			$scope.appendMessage(theMessage);
-		});
-	};
-	
-	$scope.getRoomID = function() {
-		console.log(roomsFactory.chosenRoomID);
-	};
-	
-	$scope.toggleReadyState = function() {
-		$scope.readyState = !$scope.readyState;
-		
-		if($scope.readyState) {
-			$scope.readyStateColor = 'green';
-		}
-		else {
-			$scope.readyStateColor = 'red';
-		}
-		
-		networkFactory.peersGameState.setReadyState("own", $scope.readyState);
-		
-		networkFactory.networkInterface.send("webSocket", {serverAction:"serverJob", targetID:"", command:"updateReadyState", roomID:roomsFactory.chosenRoomID, readyState:$scope.readyState});
-		
-	};
 	
 	
 	

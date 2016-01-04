@@ -10,10 +10,12 @@ var NetworkInterface = function () {
 
 
 NetworkInterface.prototype.connect = function(networkType, data) {
+	logger.log("Connecting " + networkType);
 	this.networks[networkType].connect(data);
 };
 
 NetworkInterface.prototype.send = function(networkType, data) {
+	logger.log("Sending via " + networkType);
 	this.networks[networkType].sendI(data);
 };
 
@@ -32,7 +34,8 @@ NetworkInterface.prototype.addRecvFunc = function(networkType, commandName, nuRe
 //targetID
 //command
 //otherData..
-
+/*
 NetworkInterface.prototype.send = function(networkType, data) {
 	this.networks[networkType].sendI(data);
 };
+*/

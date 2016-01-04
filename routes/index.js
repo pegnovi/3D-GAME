@@ -15,7 +15,10 @@ router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
 });
 
-
+//GET all the rooms from the db
+// or
+//GET room with specified id 
+//(Depends on params provided)
 router.get('/rooms', function(req, res, next) {
 	Room.find(function(err, rooms) {
 		if(err) { return next(err); }
