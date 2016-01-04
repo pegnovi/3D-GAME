@@ -11,6 +11,8 @@ var morgan = require('morgan'); //used to see requests
 var mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost/test');
 
+//var easyrtc = require("easyrtc"); // EasyRTC external module
+
 
 var routes = require('./routes/index').router;
 var apiRoutes = require('./routes/index').apiRouter;
@@ -96,9 +98,14 @@ var server = http.createServer(app);
 //=====================
 socket = socket.listen(server);
 
+// Start EasyRTC server
+//var easyrtcServer = easyrtc.listen(app, socket);
+
 server.listen(3000); //use this if running locally
 //server.listen(80); //use this if uploading to nodejitsu
 //server.listen(process.env.OPENSHIFT_NODEJS_PORT, process.env.OPENSHIFT_NODEJS_IP); //use this if deploying to openshift
+
+
 
 //Represents a group of clients in the same room
 var groups = {}; //roomID : list of client ids
