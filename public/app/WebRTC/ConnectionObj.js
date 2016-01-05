@@ -26,10 +26,12 @@ var ConnectionObj = function(targetID, commandSet, socketInterface) {
 			{'url':'stun:stun2.l.google.com:19302'},
 			{'url':'stun:stun3.l.google.com:19302'},
 			{'url':'stun:stun4.l.google.com:19302'},
+			
 			{'url': "stun:stun.sipgate.net"},
 			{'url': "stun:217.10.68.152"},
 			{'url': "stun:stun.sipgate.net:10000"},
 			{'url': "stun:217.10.68.152:10000"},
+			
 			{'url':'stun:stunserver.org'},
 			{'url':'stun:stun.softjoys.com'},
 			{'url':'stun:stun.voiparound.com'},

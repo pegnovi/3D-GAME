@@ -120,6 +120,7 @@ apiRouter.post('/authenticate', function(req, res) {
 
 });
 
+////https://scotch.io/tutorials/authenticate-a-node-js-api-with-json-web-tokens
 //middleware to use for all requests
 //route middleware to verify a token
 apiRouter.use(function(req, res, next) {
