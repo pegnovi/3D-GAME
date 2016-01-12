@@ -7,17 +7,18 @@ var path = require('path');
 var favicon = require('serve-favicon');
 var bodyParser = require('body-parser'); //lets us pull POST content from HTTP request for processing
 var morgan = require('morgan'); //used to see requests
-
+var passport = require('passport');
 var mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost/test');
 
 //var easyrtc = require("easyrtc"); // EasyRTC external module
 
-
 var routes = require('./routes/index').router;
 var apiRoutes = require('./routes/index').apiRouter;
 
 var app = express(); //define our app using express
+
+app.use(passport.initialize());
 
 // APP CONFIG
 // --------------------

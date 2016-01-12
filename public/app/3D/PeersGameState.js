@@ -6,6 +6,9 @@ var PeersGameState = function() {
 	//"own" : booleanReadyState
 	this.addPeer("own", false);
 	
+	//add more vars for each peer (or change this.readyStates to a dict of peer state objects)
+	
+	
 };
 
 PeersGameState.prototype.initPeers = function(peerIDs) {

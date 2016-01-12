@@ -1,5 +1,5 @@
 //Create the 'rooms' factory
-app.factory('roomsFactory', ['$http', function($http) {
+app.factory('roomsFactory', ['$http', 'auth', function($http, auth) {
 
 	var obj = {};
 	obj.chosenRoomID = -1;
@@ -16,10 +16,10 @@ app.factory('roomsFactory', ['$http', function($http) {
 		});
 	};
 	obj.create = function(room) {
-		return $http.post('/room', room).success(function(data) {
+		return $http.post('/room', room, 
+						  {headers: {Authorization: 'Bearer '+auth.getToken()}}
+						 ).success(function(data) {
 			obj.rooms.push(data);
-			
-
 		});
 	};
 	obj.get = function(id) {

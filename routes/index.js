@@ -4,16 +4,25 @@ var router = express.Router();
 var User = require('../models/user');
 var Room = require('../models/room');
 
-var jwt = require('jsonwebtoken');
 var superSecret = 'blahThisblahIsblahSuperblahSecretblah';
 
 var path = require('path');
+
+var mongoose = require('mongoose');
+
+var Expressjwt = require('express-jwt');
+var auth = Expressjwt({secret: "SECRET", userProperty: 'payload'});
+//(userProperty: payload) So req.payload will contain the token data (It's req.user contains it by default)
+
+var passport = require('passport');
+require('../config/passport');
 
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
 });
+
 
 //GET all the rooms from the db
 // or
@@ -27,6 +36,7 @@ router.get('/rooms', function(req, res, next) {
 	});
 });
 
+/*
 router.post('/room', function(req, res, next) {
 	var room = new Room(req.body);
 	
@@ -36,6 +46,7 @@ router.post('/room', function(req, res, next) {
 		res.json(room);
 	});
 });
+*/
 
 //http://webapplog.com/intro-to-express-js-parameters-error-handling-and-other-middleware/
 router.param('id', function(req, res, next, id) {
@@ -68,7 +79,68 @@ router.get('/room/:id', function(req, res) {
 	res.json(req.room);
 });
 
+router.post('/register', function(req, res, next) {
+	if(!req.body.username || !req.body.password) {
+		return res.status(400).json({message: 'please fill out all fields'});
+	}
+	
+	console.log("Creating new User");
+	var user = new User();
+	user.username = req.body.username;
+	user.setPassword(req.body.password);
+	
+	user.save(function(err) { 
+		if(err) { next(err); }
+		
+		console.log("New User Created. Returning token");
+		return res.json({token: user.generateJWT()});
+	});
+});
 
+router.post('/login', function(req, res, next) {
+	if(!req.body.username || !req.body.password) {
+		return res.status(400).json({message: 'please fill out all fields'});
+	}
+	
+	console.log("Logging User In");
+	
+	passport.authenticate('local', function(err, user, info) {
+		if(err) { return next(err); }
+		
+		if(user) {
+			console.log("User found, returning token");
+			return res.json({token: user.generateJWT()});
+		}
+		else {
+			return res.status(401).json(info);
+		}
+	})(req, res, next);
+});
+
+router.post('/room', auth, function(req, res, next) {
+	var room = new Room(req.body);
+	
+	room.save(function(err, room) {
+		if(err) { return next(err); }
+		
+		res.json(room);
+	});
+});
+
+
+// ROUTES FOR API
+// ==============================
+var apiRouter = express.Router();
+
+apiRouter.get('/try', function(req, res, next) {
+	console.log("HELLO TRY");
+	res.status(200);
+});
+
+
+
+
+/*
 // ROUTES FOR API
 // ==============================
 
@@ -120,7 +192,7 @@ apiRouter.post('/authenticate', function(req, res) {
 
 });
 
-////https://scotch.io/tutorials/authenticate-a-node-js-api-with-json-web-tokens
+//https://scotch.io/tutorials/authenticate-a-node-js-api-with-json-web-tokens
 //middleware to use for all requests
 //route middleware to verify a token
 apiRouter.use(function(req, res, next) {
@@ -264,7 +336,7 @@ apiRouter.route('/users/:user_id')
 		});
 	});
 
-
+*/
 
 
 module.exports.router = router;

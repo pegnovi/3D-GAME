@@ -29,10 +29,12 @@
     "easyrtc": "^1.0.15",
     "ejs": "~2.3.2",
     "express": "~4.13.0",
+    "express-jwt": "^3.3.0",
     "jsonwebtoken": "^5.4.0",
     "mongoose": "^4.1.9",
     "morgan": "~1.6.1",
     "passport": "^0.3.2",
+    "passport-local": "^1.0.0",
     "serve-favicon": "~2.3.0",
     "socket.io": "^1.3.6"
   },
