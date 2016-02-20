@@ -46,6 +46,7 @@
 							<!--Register Form Here-->
 							<form ng-submit="register()">
 								<!--<input placeholder="Email" id="user_email" style="margin-bottom: 15px;" type="text" name="user[username]" size="30" />-->
+								<input placeholder="Email" style="margin-bottom: 15px;" type="text" ng-model="user.email" name="user[email]" size="30" />
 								<input placeholder="Username" style="margin-bottom: 15px;" type="text" ng-model="user.username" name="user[username]" size="30" />
 								<input placeholder="Password" style="margin-bottom: 15px;" type="password" ng-model="user.password" name="user[password]" size="30" />
 								

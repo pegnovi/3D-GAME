@@ -61,7 +61,7 @@ router.param('id', function(req, res, next, id) {
 	
 	query.exec(function(err, room) {
 		if(err) { return next(err); }
-		if(!room) { return next(new Error('cannot find post')); }
+		if(!room) { return next(new Error('cannot find room')); }
 		
 		console.log("found room");
 		
@@ -80,13 +80,14 @@ router.get('/room/:id', function(req, res) {
 });
 
 router.post('/register', function(req, res, next) {
-	if(!req.body.username || !req.body.password) {
+	if(!req.body.username || !req.body.password || !req.body.email) {
 		return res.status(400).json({message: 'please fill out all fields'});
 	}
 	
 	console.log("Creating new User");
 	var user = new User();
 	user.username = req.body.username;
+	user.email = req.body.email;
 	user.setPassword(req.body.password);
 	
 	user.save(function(err) { 
