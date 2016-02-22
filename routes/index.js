@@ -1,21 +1,24 @@
 var express = require('express');
 var router = express.Router();
 
-var User = require('../models/user');
-var Room = require('../models/room');
-
+// =|=|=|=|=|=|=|=|=|=|=|=|=|=|=|=|=
+// =|=|=|= Passport JS stuff =|=|=|=
+// =|=|=|=|=|=|=|=|=|=|=|=|=|=|=|=|=
 var superSecret = 'blahThisblahIsblahSuperblahSecretblah';
-
-var path = require('path');
-
-var mongoose = require('mongoose');
-
 var Expressjwt = require('express-jwt');
 var auth = Expressjwt({secret: "SECRET", userProperty: 'payload'});
 //(userProperty: payload) So req.payload will contain the token data (It's req.user contains it by default)
 
 var passport = require('passport');
 require('../config/passport');
+// =|=|=|=|=|=|=|=|=|=|=|=|=|=|=|=|=
+// =|=|=|=|=|=|=|=|=|=|=|=|=|=|=|=|=
+
+
+// ->->-> Other Routes ->->->
+var roomsMainUrl = require('./roomRoutes').roomsMainUrl;
+var roomRoutes = require('./roomRoutes').roomsRouter;
+router.use(roomsMainUrl, roomRoutes); //router.use('/rooms', roomRoutes);
 
 
 /* GET home page. */
@@ -23,62 +26,7 @@ router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
 });
 
-
-//GET all the rooms from the db
-// or
-//GET room with specified id 
-//(Depends on params provided)
-router.get('/rooms', function(req, res, next) {
-	Room.find(function(err, rooms) {
-		if(err) { return next(err); }
-		
-		res.json(rooms);
-	});
-});
-
-/*
-router.post('/room', function(req, res, next) {
-	var room = new Room(req.body);
-	
-	room.save(function(err, room) {
-		if(err) { return next(err); }
-		
-		res.json(room);
-	});
-});
-*/
-
-//http://webapplog.com/intro-to-express-js-parameters-error-handling-and-other-middleware/
-router.param('id', function(req, res, next, id) {
-	//do something with id
-	//store id or other info in req object
-	//call next when done
-	
-	console.log("id = ");
-	console.log(id);
-	
-	var query = Room.findById(id);
-	
-	query.exec(function(err, room) {
-		if(err) { return next(err); }
-		if(!room) { return next(new Error('cannot find room')); }
-		
-		console.log("found room");
-		
-		req.room = room;
-		return next();
-	});
-	
-});
-
-router.get('/room/:id', function(req, res) {
-	//param middleware will be executed before 
-	//and we can expect req object to already have needed info
-	
-	console.log("sending room");
-	res.json(req.room);
-});
-
+var User = require('../models/user');
 router.post('/register', function(req, res, next) {
 	if(!req.body.username || !req.body.password || !req.body.email) {
 		return res.status(400).json({message: 'please fill out all fields'});
@@ -118,6 +66,9 @@ router.post('/login', function(req, res, next) {
 	})(req, res, next);
 });
 
+
+/*
+var Room = require('../models/room');
 router.post('/room', auth, function(req, res, next) {
 	var room = new Room(req.body);
 	
@@ -127,7 +78,7 @@ router.post('/room', auth, function(req, res, next) {
 		res.json(room);
 	});
 });
-
+*/
 
 // ROUTES FOR API
 // ==============================

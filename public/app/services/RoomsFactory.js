@@ -16,14 +16,14 @@ app.factory('roomsFactory', ['$http', 'auth', function($http, auth) {
 		});
 	};
 	obj.create = function(room) {
-		return $http.post('/room', room, 
+		return $http.post('/rooms', room, 
 						  {headers: {Authorization: 'Bearer '+auth.getToken()}}
 						 ).success(function(data) {
 			obj.rooms.push(data);
 		});
 	};
 	obj.get = function(id) {
-		return $http.get('/room/' + id).then(function(res) {
+		return $http.get('/rooms/' + id).then(function(res) {
 			
 			//return res.data;
 			

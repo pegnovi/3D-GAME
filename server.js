@@ -18,8 +18,7 @@ db.once('open', function() {
 
 //var easyrtc = require("easyrtc"); // EasyRTC external module
 
-var routes = require('./routes/index').router;
-var apiRoutes = require('./routes/index').apiRouter;
+
 
 var app = express(); //define our app using express
 
@@ -49,8 +48,14 @@ app.use(function(req, res, next) {
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', routes);
+
+//Use routes
+var routes = require('./routes/index').router;
+app.use(routes);
+
+var apiRoutes = require('./routes/index').apiRouter;
 app.use('/api', apiRoutes);
+
 
 //Main CatchAll Route
 //send users to frontend (angular app)
