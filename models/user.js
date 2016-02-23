@@ -29,6 +29,10 @@ UserSchema.methods.generateJWT = function() {
 	var exp = new Date(today);
 	exp.setDate(today.getDate() + 60);
 	
+	//JSON Web Token
+	//sign with default (HMAC SHA256)
+	//First argument is payload/claims
+	//2nd argument is secret key for hashing alg
 	return jwt.sign({
 						_id: this._id,
 						username: this.username,

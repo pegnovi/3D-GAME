@@ -101,8 +101,9 @@ app.use(function(err, req, res, next) {
 
 
 
-
+//use https?
 var server = http.createServer(app);
+
 
 //=====================
 //===socket.io stuff===

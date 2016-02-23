@@ -1,6 +1,7 @@
 app.factory('auth', ['$http', '$window', function($http, $window) {
 	var auth = {};
 	
+	//should save in https cookie to be safer
 	auth.saveToken = function(token) {
 		$window.localStorage['session-token'] = token;
 	};

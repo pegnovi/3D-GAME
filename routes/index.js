@@ -1,6 +1,8 @@
 var express = require('express');
 var router = express.Router();
 
+var User = require('../models/user');
+
 // =|=|=|=|=|=|=|=|=|=|=|=|=|=|=|=|=
 // =|=|=|= Passport JS stuff =|=|=|=
 // =|=|=|=|=|=|=|=|=|=|=|=|=|=|=|=|=
@@ -26,7 +28,7 @@ router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
 });
 
-var User = require('../models/user');
+
 router.post('/register', function(req, res, next) {
 	if(!req.body.username || !req.body.password || !req.body.email) {
 		return res.status(400).json({message: 'please fill out all fields'});
