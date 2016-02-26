@@ -2,12 +2,14 @@
 
 var express = require('express');
 var socket = require('socket.io');
+var cookieParser = require('cookie-parser');
 var http = require('http');
 var path = require('path');
 var favicon = require('serve-favicon');
 var bodyParser = require('body-parser'); //lets us pull POST content from HTTP request for processing
 var morgan = require('morgan'); //used to see requests
 var passport = require('passport');
+//var openssl = require('openssl-wrapper');
 var mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost/test');
 var db = mongoose.connection;
@@ -16,6 +18,13 @@ db.once('open', function() {
 	console.log("We're connected to the Database!");
 });
 
+var https = require('https');
+var fs = require('fs');
+var options = {
+   key  : fs.readFileSync('./sslCertificate/server-key.pem'), //private key
+   cert : fs.readFileSync('./sslCertificate/server-cert.pem') //public certificate
+};
+
 //var easyrtc = require("easyrtc"); // EasyRTC external module
 
 
@@ -23,6 +32,7 @@ db.once('open', function() {
 var app = express(); //define our app using express
 
 app.use(passport.initialize());
+app.use(cookieParser());
 
 // APP CONFIG
 // --------------------
@@ -102,8 +112,8 @@ app.use(function(err, req, res, next) {
 
 
 //use https?
-var server = http.createServer(app);
-
+//var server = http.createServer(app);
+var server = https.createServer(options, app);
 
 //=====================
 //===socket.io stuff===
@@ -113,7 +123,7 @@ socket = socket.listen(server);
 // Start EasyRTC server
 //var easyrtcServer = easyrtc.listen(app, socket);
 
-server.listen(3000); //use this if running locally
+server.listen(8000); //use this if running locally
 //server.listen(80); //use this if uploading to nodejitsu
 //server.listen(process.env.OPENSHIFT_NODEJS_PORT, process.env.OPENSHIFT_NODEJS_IP); //use this if deploying to openshift
 

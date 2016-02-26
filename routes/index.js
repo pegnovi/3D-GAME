@@ -8,8 +8,10 @@ var User = require('../models/user');
 // =|=|=|=|=|=|=|=|=|=|=|=|=|=|=|=|=
 var superSecret = 'blahThisblahIsblahSuperblahSecretblah';
 var Expressjwt = require('express-jwt');
-var auth = Expressjwt({secret: "SECRET", userProperty: 'payload'});
-//(userProperty: payload) So req.payload will contain the token data (It's req.user contains it by default)
+//var auth = Expressjwt({secret: "SECRET", userProperty: 'payload'});
+//(userProperty: payload) So req.payload will contain the token data (req.user contains it by default)
+var auth = Expressjwt({secret: "SECRET", requestProperty: 'payload'});
+//(requestProperty: payload) So req.payload will contain the token data (req.user contains it by default)
 
 var passport = require('passport');
 require('../config/passport');
@@ -25,7 +27,9 @@ router.use(roomsMainUrl, roomRoutes); //router.use('/rooms', roomRoutes);
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
+	console.log("COOKIE");
+	console.log(req.cookies.auth);
+	res.render('index', { title: 'Express' });
 });
 
 
@@ -60,7 +64,11 @@ router.post('/login', function(req, res, next) {
 		
 		if(user) {
 			console.log("User found, returning token");
-			return res.json({token: user.generateJWT()});
+			var daToken = user.generateJWT();
+			
+			res.cookie('auth', daToken);
+			//res.send('ok');
+			return res.json({token: daToken});
 		}
 		else {
 			return res.status(401).json(info);
@@ -69,9 +77,13 @@ router.post('/login', function(req, res, next) {
 });
 
 
-/*
+////*
 var Room = require('../models/room');
-router.post('/room', auth, function(req, res, next) {
+router.post('/rooms', auth, function(req, res, next) {
+
+	console.log("req.payload");
+	console.log(req.payload);
+
 	var room = new Room(req.body);
 	
 	room.save(function(err, room) {
@@ -80,7 +92,7 @@ router.post('/room', auth, function(req, res, next) {
 		res.json(room);
 	});
 });
-*/
+//*/
 
 // ROUTES FOR API
 // ==============================

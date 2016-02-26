@@ -3,6 +3,10 @@ app.factory('auth', ['$http', '$window', function($http, $window) {
 	
 	//should save in https cookie to be safer
 	auth.saveToken = function(token) {
+		console.log("Find token!!!");
+		
+		console.log(document);
+		console.log(token);
 		$window.localStorage['session-token'] = token;
 	};
 	

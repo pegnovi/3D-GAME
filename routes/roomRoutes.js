@@ -18,7 +18,8 @@ router.get('/', function(req, res, next) {
 	});
 });
 
-
+//Create a room
+/*
 router.post('/', function(req, res, next) {
 	var room = new Room(req.body);
 	
@@ -28,7 +29,7 @@ router.post('/', function(req, res, next) {
 		res.json(room);
 	});
 });
-
+*/
 
 //http://webapplog.com/intro-to-express-js-parameters-error-handling-and-other-middleware/
 router.param('id', function(req, res, next, id) {
