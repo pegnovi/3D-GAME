@@ -16,8 +16,9 @@ app.factory('roomsFactory', ['$http', 'auth', function($http, auth) {
 		});
 	};
 	obj.create = function(room) {
-		return $http.post('/rooms', room, 
-						  {headers: {Authorization: 'Bearer ' + auth.getToken()}}
+		//no need to attach token to head since it's stored in a cookie (cookies are auto-sent)
+		return $http.post('/rooms', room 
+						  //{headers: {Authorization: 'Bearer ' + auth.getToken()}}
 						 ).success(function(data) {
 			obj.rooms.push(data);
 		});
