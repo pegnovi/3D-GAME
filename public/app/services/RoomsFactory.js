@@ -36,18 +36,4 @@ app.factory('roomsFactory', ['$http', 'auth', function($http, auth) {
 	
 	return obj;
 	
-	/*
-	return {
-		rooms: [
-			new Room('room 1', 'Deathmatch', ''),
-			new Room('room 2', 'Normal', ''),
-			new Room('room 3', 'Tag', ''),
-			new Room('room 4', 'Grid', ''),
-			new Room('room 5', 'Clan', ''),
-			new Room('room 6', 'Practice', ''),
-			new Room('room 7', 'Ranked', '')
-		]
-	};
-	*/
-	
 }]);

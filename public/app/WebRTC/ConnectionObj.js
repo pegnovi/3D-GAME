@@ -72,7 +72,11 @@ var ConnectionObj = function(targetID, commandSet, socketInterface) {
 		
 		if(event.candidate) {
 			console.log(event.candidate);
-			self.socketInterface.send("re-route", targetID, "iceCandidate", {candidate: event.candidate});
+			self.socketInterface.sendI({serverAction: "re-route", 
+										targetID: self.targetID, 
+										command:"iceCandidate", 
+										otherData:{candidate: event.candidate}
+									   });
 		}
 		else {
 			console.log("!!! END OF CANDIDATES !!!");
@@ -163,7 +167,11 @@ ConnectionObj.prototype.createOfferToPeerConnection = function(peerID) {
 			function() {
 				//send the offer to a server to be forwarded to the friend you're calling
 				console.log("SENDING OFFER");
-				self.socketInterface.send("re-route", peerID, "offerFromPeer", {offer: offer});
+				self.socketInterface.sendI({serverAction: "re-route", 
+											targetID: peerID, 
+											command: "offerFromPeer", 
+											otherData: {offer: offer}
+										   });
 								
 			}, error);
 	}, error);
@@ -193,7 +201,11 @@ ConnectionObj.prototype.createAnswer = function(offererID) {
 			//https://github.com/ESTOS/strophe.jingle/issues/35
 			//send the answer to a server to be forwarded back to the caller
 			console.log("SENDING ANSWER");
-			self.socketInterface.send("re-route", offererID, "answerFromPeer", {peerName: self.name, answer: answer});
+			self.socketInterface.sendI({serverAction: "re-route", 
+										targetID: offererID, 
+										command: "answerFromPeer", 
+										otherData: {peerName: self.name, answer: answer}
+									   });
 					
 		}, error);
 	}, error);

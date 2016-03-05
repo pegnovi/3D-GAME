@@ -1,11 +1,11 @@
 //NetworkInterface
 //must implement:
 //	connect(data) method
-//	send(data) method
+//	sendI(data) method
 
 //Communication Tool assuming Mesh Network between peers
 var CommuTool = function(socketInterface) {
-	this.socketInterface = socketInterface;
+	this.socketInterface = socketInterface; //need a socket communication interface to establish peer connection
 	this.conObjs = {}; //clientID : connectionObj
 	
 	this.commandSetDataChannels = null;
@@ -70,6 +70,7 @@ var CommuTool = function(socketInterface) {
 		self.addIceCandidateToPeer(data.originatorID, data.candidate);
 	};
 	this.recvFuncs["deletePeer"] = function(data) {
+		console.log("Peer " + data.peerToDelete + " has exited");
 		self.deletePeer(data.peerToDelete);
 	};
 		
@@ -81,7 +82,11 @@ var CommuTool = function(socketInterface) {
 };
 
 CommuTool.prototype.connect = function(data) {
-	this.socketInterface.send("serverJob", "", "joinRoom", {roomID: data.chosenRoomID});
+	this.socketInterface.sendI({serverAction: "serverJob", 
+								targetID: "", 
+								command: "joinRoom", 
+								otherData: {roomID: data.roomID}
+							   });
 };
 
 //Both
@@ -101,7 +106,7 @@ CommuTool.prototype.addRecvFunc = function(commandName, nuRecvFunc) {
 
 //{(((((((((( Initiator ))))))))))
 	
-//Create a single ConnectionObj for a groupmate
+//Create a single ConnectionObj for a peer
 CommuTool.prototype.createConnectionObj = function(peerID, hasOwnDataChannel) {
 	this.conObjs[peerID] = new ConnectionObj(peerID, this.commandSetDataChannels, this.socketInterface);
 	
@@ -109,13 +114,13 @@ CommuTool.prototype.createConnectionObj = function(peerID, hasOwnDataChannel) {
 		this.conObjs[peerID].makeOwnDataChannel();
 	}
 };
-//Create ConnectionObj for each groupmate
+//Create ConnectionObj for each peer
 CommuTool.prototype.createConnectionObjs = function(peerIDs, hasOwnDataChannels) {
 	for(var i=0; i<peerIDs.length; i++) {
 		this.createConnectionObj(peerIDs[i], hasOwnDataChannels);
 	}
 };
-//If sending offer, the connectionObj created for each groupmate must already have a datachannel
+//If sending offer, the connectionObj created for each peer must already have a datachannel
 CommuTool.prototype.sendOfferToPeer = function(peerID) {
 	if(this.conObjs[peerID] != undefined) {
 		this.conObjs[peerID].createOfferToPeerConnection(peerID);
@@ -156,7 +161,7 @@ CommuTool.prototype.deletePeer = function(peerID) {
 //}
 // )))))))))))))))(((((((((((((((
 	
-//via dataChannel
+//via WebRTC dataChannel
 CommuTool.prototype.sendToGroup = function(theCommand, theData) {
 	for(var id in this.conObjs) {
 		//console.log(conObjs[id]);
@@ -180,4 +185,11 @@ CommuTool.prototype.sendI = function(data) {
 	this.sendToGroup(data["command"], data);
 };
 
+CommuTool.prototype.checkParamsOK = function(data) {
+	if(typeof data["command"] === 'undefined') {
+		console.log("No command specified");
+		return false;
+	}
+	return true;
+};
 

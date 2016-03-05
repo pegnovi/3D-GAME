@@ -112,8 +112,8 @@ app.use(function(err, req, res, next) {
 
 
 //use https?
-//var server = http.createServer(app);
-var server = https.createServer(options, app);
+var server = http.createServer(app);
+//var server = https.createServer(options, app);
 
 //=====================
 //===socket.io stuff===
@@ -123,7 +123,7 @@ socket = socket.listen(server);
 // Start EasyRTC server
 //var easyrtcServer = easyrtc.listen(app, socket);
 
-server.listen(8000); //use this if running locally
+server.listen(3000); //use this if running locally
 //server.listen(80); //use this if uploading to nodejitsu
 //server.listen(process.env.OPENSHIFT_NODEJS_PORT, process.env.OPENSHIFT_NODEJS_IP); //use this if deploying to openshift
 
@@ -162,8 +162,12 @@ socket.on("connection", function(client) {
 	serverJobFuncs["joinRoom"] = function(data) {
 		client.room = data.roomID;
 	
-		if(groups[data.roomID] == undefined) {
+		console.log("Joining Room");
+		console.log(typeof groups[data.roomID]);
+		if(typeof groups[data.roomID] === 'undefined') {
 			//create new room
+			console.log("Creating new group room");
+			console.log(data);
 			groups[data.roomID] = {};
 			
 		}
@@ -196,13 +200,25 @@ socket.on("connection", function(client) {
 			});
 		}
 		
-		//push this client's id into room
+		//put this client's id into room
+		console.log("putting id " + client.id);
 		groups[data.roomID][client.id] = {readyState: false};
+		console.log(groups);
 	};
 	serverJobFuncs["updateReadyState"] = function(data) {
-
+		
+		console.log("Peers in room in update ready state");
+		for(var key in groups[data.roomID]){
+			if(groups[data.roomID].hasOwnProperty(key)) {
+				console.log(key);
+			}
+		}
+		console.log("groups");
+		console.log(groups);
+		console.log(groups[data.roomID]);
 		//update server on client readyState
 		groups[data.roomID][client.id].readyState = data.readyState;
+		
 		
 		//broadcast readyState to group
 		for(var peer in groups[data.roomID]) {
@@ -280,7 +296,7 @@ socket.on("connection", function(client) {
 			
 			//add to group
 			var found = false;
-			if(groups[data.room] != undefined) {
+			if(typeof groups[data.room] !== 'undefined') {
 				for(var i=0; i<groups[data.room].length; i++) {
 					if(groups[data.room][i].id == client.id) {
 						found = true;

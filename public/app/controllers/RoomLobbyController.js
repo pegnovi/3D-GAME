@@ -46,7 +46,11 @@ function($scope, $state, roomsFactory, networkFactory) {
 		
 		networkFactory.peersGameState.setReadyState("own", $scope.readyState);
 		
-		networkFactory.networkInterface.send("webSocket", {serverAction:"serverJob", targetID:"", command:"updateReadyState", roomID:roomsFactory.chosenRoomID, readyState:$scope.readyState});
+		networkFactory.networkInterface.send("webSocket", {serverAction: "serverJob", 
+														   targetID: "", 
+														   command: "updateReadyState", 
+														   otherData: {roomID: roomsFactory.chosenRoomID, readyState: $scope.readyState}
+														  });
 	};
 	
 	

@@ -3,8 +3,8 @@ var PeerConnection = null;
 var SessionDescription = null;
 var RTCIceCandidate = null;
 
-var socket = null;
 
+//Contains socketInterface(webSocket) and commuTool(WebRTC)
 var networkInterface = new NetworkInterface();
 
 var peersGameState = new PeersGameState();
@@ -13,7 +13,7 @@ var peersGameState = new PeersGameState();
 //(((((((((( RECV FUNCS ))))))))))
 //(((((((((((((((())))))))))))))))
 var recvFuncs = {};
-recvFuncs["roomPeers"] = function(data) {
+recvFuncs["roomPeers"] = function(data) { //This is where actual WebRTC connection happens between peers
 	//Create ConnectionObj for each roomPeer
 	networkInterface.networks["webRTC"].createConnectionObjs(data.groupmatesIDs, true);
 		

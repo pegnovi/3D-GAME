@@ -7,9 +7,6 @@ var Room = require('../models/room');
 var mainRouteUrl = "/rooms";
 
 //GET all the rooms from the db
-// or
-//GET room with specified id 
-//(Depends on params provided)
 router.get('/', function(req, res, next) {
 	Room.find(function(err, rooms) {
 		if(err) { return next(err); }
@@ -37,8 +34,7 @@ router.param('id', function(req, res, next, id) {
 	//store id or other info in req object
 	//call next when done
 	
-	console.log("id = ");
-	console.log(id);
+	console.log("desired room id = " + id);
 	
 	var query = Room.findById(id);
 	
@@ -54,6 +50,7 @@ router.param('id', function(req, res, next, id) {
 	
 });
 
+//GET room with specified id 
 router.get('/:id', function(req, res) {
 	//param middleware will be executed before 
 	//and we can expect req object to already have needed info

@@ -16,7 +16,18 @@ NetworkInterface.prototype.connect = function(networkType, data) {
 
 NetworkInterface.prototype.send = function(networkType, data) {
 	logger.log("Sending via " + networkType);
-	this.networks[networkType].sendI(data);
+	if(this.checkParamsOK(networkType, data)) {
+		this.networks[networkType].sendI(data);
+	}
+	else {
+		logger.log("Some Networking Params Were Missing");
+	}
+	
+};
+
+NetworkInterface.prototype.checkParamsOK = function(networkType, data) {
+	logger.log("Checking Networking Params");
+	return this.networks[networkType].checkParamsOK(data);
 };
 
 

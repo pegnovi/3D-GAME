@@ -1,7 +1,9 @@
 //NetworkInterface
 //must implement:
 //	connect(data) method
-//	send(data) method
+//  checkParamsOK(data) method
+//	sendI(data) method
+
 
 var SocketInterface = function () {
 	this.socket = null;
@@ -21,34 +23,8 @@ SocketInterface.prototype.connect = function(data) {
 	this.setRecvProcessing();
 };
 
-SocketInterface.prototype.socketConnect = function(io) {
-	
-	console.log("socket connecting...");
 
-	//this.socket = io.connect("p2pChatAndDraw.jit.su:80"); //use this if uploading to nodejitsu
-	//this.socket = io.connect("http://nodejswebrtc-pegtest.rhcloud.com:8000/", {'forceNew':true, 'sync disconnect on unload': true });
-	this.socket = io.connect("127.0.0.1:3000", {'sync disconnect on unload': true }); //use this if running locally
-	
-	console.log("socket connected!!!");
-	
-	this.setRecvProcessing();
-};
-
-SocketInterface.prototype.setSocket = function(socket) {
-	this.socket = socket;
-	
-	/*
-	var self = this;
-	//re-route socket messages to "receive" function
-	this.socket.on("serverMessage", function(data) {
-		//data should contain originatorID, command, other data
-		self.recvCommands.execute(JSON.parse(data));
-	});
-	*/
-	
-	this.setRecvProcessing();
-};
-
+//call once we have socket connection
 SocketInterface.prototype.setRecvProcessing = function() {
 	var self = this;
 	//re-route socket messages to "receive" function
@@ -67,22 +43,37 @@ SocketInterface.prototype.addRecvFunc = function(commandName, nuRecvFunc) {
 };
 
 //Message Format:
-//targetID
-//command
-//data
-SocketInterface.prototype.send = function(serverAction, targetID, command, data) {
-	
-	console.log("SENDING");
+//targetID - who the message is for (can be "" if it's for the server)
+//command - a string representing a command
+//otherData - an object with other key-value pairs
+
+//argument "data" must contain the above key-value pairs
+SocketInterface.prototype.sendI = function(data) {
+	console.log("Socket SENDING");
 	
 	//pack up and stringify IDs, command, and data
-	data["targetID"] = targetID;			
-	data["command"] = command;	//command for the server	
+	data["otherData"]["targetID"] = data["targetID"];			
+	data["otherData"]["command"] = data["command"];	//command for the server	
 	
-	this.socket.emit(serverAction, JSON.stringify(data));
-	
+	this.socket.emit(data["serverAction"], JSON.stringify(data["otherData"]));
 };
 
-SocketInterface.prototype.sendI = function(data) {
-	this.socket.emit(data["serverAction"], JSON.stringify(data));
+SocketInterface.prototype.checkParamsOK = function(data) {
+	if(typeof data["serverAction"] === 'undefined') {
+		console.log("No serverAction specified");
+		return false;
+	}
+	if(typeof data["targetID"] === 'undefined') {	
+		data["targetID"] = "";
+	}
+	if(typeof data["command"] === 'undefined') {
+		console.log("No command specified");
+		return false;
+	}
+	if(typeof data["otherData"] === 'undefined') {
+		console.log("No otherData found");
+		return false;
+	}
+	
+	return true;
 };
-

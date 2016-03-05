@@ -99,16 +99,24 @@ function($stateProvider, $urlRouterProvider) {
 					}],
 					
 					socketConn: ['roomsFactory', 'networkFactory', function(roomsFactory, networkFactory) {
+					
+						console.log("Socket Time");
+					
 						if(networkFactory.networkInterface.networks["webSocket"].socket == null) {
 							networkFactory.networkInterface.connect("webSocket", {io:io});
-							networkFactory.networkInterface.send("webSocket", {serverAction:"serverJob", targetID:"", command:"joinRoom", roomID: roomsFactory.chosenRoomID});
-
+							
+							//networkFactory.networkInterface.send("webSocket", {serverAction:"serverJob", targetID:"", command:"joinRoom", roomID: roomsFactory.chosenRoomID});
+							networkFactory.networkInterface.connect("webRTC", {roomID: roomsFactory.chosenRoomID});
 						}
 						
-						
+						console.log("HERE");
 						//broadcast (re-route?) signal for ready state
 						networkFactory.peersGameState.setReadyState("own", false);
-						networkFactory.networkInterface.send("webSocket", {serverAction:"serverJob", targetID:"", command:"updateReadyState", roomID:roomsFactory.chosenRoomID, readyState:false});
+						networkFactory.networkInterface.send("webSocket", {serverAction: "serverJob", 
+																		   targetID: "", 
+																		   command: "updateReadyState", 
+																		   otherData:{roomID:roomsFactory.chosenRoomID, readyState:false}
+																		  });
 						
 					}]
 					
