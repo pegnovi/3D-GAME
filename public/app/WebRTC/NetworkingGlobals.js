@@ -13,14 +13,7 @@ var peersGameState = new PeersGameState();
 //(((((((((( RECV FUNCS ))))))))))
 //(((((((((((((((())))))))))))))))
 var recvFuncs = {};
-recvFuncs["roomPeers"] = function(data) { //This is where actual WebRTC connection happens between peers
-	//Create ConnectionObj for each roomPeer
-	networkInterface.networks["webRTC"].createConnectionObjs(data.groupmatesIDs, true);
-		
-	//Send offers to RoomPeers
-	networkInterface.networks["webRTC"].sendOfferToGroupmates(data.groupmatesIDs);
-};
-recvFuncs["peerReadyStates"] = function(data) {
+recvFuncs["peerReadyStates"] = function(data) { //receive peer ready states
 	console.log("PEER READY STATES");
 	console.log(data.peerReadyStates);
 	for(var key in data.peerReadyStates) {

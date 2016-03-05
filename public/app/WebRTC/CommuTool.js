@@ -52,6 +52,13 @@ var CommuTool = function(socketInterface) {
 	//{ =>=>=>=>=> Receive Functions =>=>=>=>=>
 	//   =>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>
 	this.recvFuncs = {};
+	this.recvFuncs["peers"] = function(data) {
+		//Create ConnectionObj for each peer
+		self.createConnectionObjs(data.peerIDs, true);
+		
+		//Send offers to RoomPeers
+		self.sendOfferToGroupmates(data.peerIDs);
+	};
 	this.recvFuncs["offerFromPeer"] = function(data) {
 		console.log("!!!OFFER RECEIVED");
 		console.log(data.offer);

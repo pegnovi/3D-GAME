@@ -22,8 +22,6 @@ SocketInterface.prototype.connect = function(data) {
 	
 	this.setRecvProcessing();
 };
-
-
 //call once we have socket connection
 SocketInterface.prototype.setRecvProcessing = function() {
 	var self = this;

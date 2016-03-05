@@ -139,6 +139,9 @@ socket.on("connection", function(client) {
 	console.log("client id = " + client.id);
     
 	var serverSend = function(originatorID, targetID, data) {
+		if(typeof data["command"] === 'undefined') {
+			console.log("serverSend: No command Specified");
+		}
 		data["originatorID"] = originatorID;
 		socket.to(targetID).emit("serverMessage", JSON.stringify(data));
 	};
@@ -182,8 +185,9 @@ socket.on("connection", function(client) {
 				}
 			}
 			serverSend("server", client.id, {
-				command: "roomPeers",
-				groupmatesIDs: peerIDs
+				//command: "roomPeers", //obsolete this?
+				command: "peers",
+				peerIDs: peerIDs
 			});
 			
 			
