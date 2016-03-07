@@ -53,6 +53,25 @@ function($stateProvider, $urlRouterProvider) {
 		}
 	});
 	
+	$stateProvider.state('shop', {
+		url: '/shop',
+		views: {
+			'@': {
+				templateUrl: 'app/views/pages/shop/shop.html',
+				controller: 'ShopCtrl as ShopCtrl'
+			}
+		}
+	});
+	$stateProvider.state('shop.cart', {
+		url: '/cart',
+		views: {
+			'@': {
+				templateUrl: 'app/views/pages/shop/cart.html',
+				controller: 'ShopCtrl as ShopCtrl'
+			}
+		}
+	});
+	
 	// +-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+
 	// +-=-+-=-+-=-+-=-+ GAME! +-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+
 	//{+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+

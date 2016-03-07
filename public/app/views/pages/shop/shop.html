@@ -1,0 +1,38 @@
+<div>
+	Welcome To The Shop
+	
+	<form ng-submit="">
+		<div>
+			<input id="search-input" type="text" ng-model="searchText"></input>
+			<button class="btn" type="submit">Search</button>
+		</div>
+	</form>
+	
+	<button ng-click="goToCart()">Cart</button>
+	
+	<div class="container">
+		<div class="row">
+			<div class="col-xs-1">
+
+				<table class="shopTable" style="border-spacing:10px;">
+					<tr ng-repeat="(key, value) in shopItems">
+						<td> 
+							<img ng-src="{{value.imagePath}}" style="width:50px;height:50px;"></img>
+						</td>
+						<td>
+							{{value.name}}
+						</td>
+						<td>
+							${{value.price}}
+						</td>
+						<td>
+							<button ng-click="addToCart(value.name)">Add To Cart</button>
+						</td>
+					</tr>
+				</table>
+				
+			</div>
+		</div>
+	</div>
+	
+</div>

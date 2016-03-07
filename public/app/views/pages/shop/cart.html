@@ -1,0 +1,42 @@
+<div>
+	Cart
+	
+	<div class="container">
+		<div class="row">
+			<div class="col-xs-1">
+
+				<table class="shopTable">
+					<tr ng-repeat="(key, value) in cart">
+						
+						<td> 
+							<img ng-src="{{getShopItem(key).imagePath}}" style="width:50px;height:50px;"></img>
+						</td>
+						<td>
+							{{getShopItem(key).name}}
+						</td>
+						<td>
+							x{{value}}
+						</td>
+						<td>
+							${{getShopItem(key).price * value}} (${{getShopItem(key).price}} each)
+						</td>
+						<td>
+							<button ng-click="removeFromCart(key)">Remove From Cart</button>
+						</td>
+						
+					</tr>
+					<tr>
+						<td></td>
+						<td></td>
+						<td> Total </td>
+						<td>${{calculateTotalAmountToPay()}}</td>
+					</tr>
+				</table>
+				
+				<button ng-click="buy()">Buy</button>
+				
+			</div>
+		</div>
+	</div>
+	
+</div>

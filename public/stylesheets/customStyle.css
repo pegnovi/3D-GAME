@@ -4,3 +4,12 @@ button.onReady {
 button.onUnready {
 	background-color: red;
 }
+
+table.shopTable {
+	border-spacing: 10px;
+}
+
+table.shopTable td, table.shopTable th {
+	padding: 10px;
+	border-bottom: 1px solid black;
+}
