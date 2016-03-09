@@ -12,6 +12,11 @@ function($scope, $state, itemsFactory) {
 	// === InventoryController functions ===
 	$scope.getShopItem = itemsFactory.getShopItem;
 	$scope.useItem = function(itemIndex) {
+		//get the item
+		//run its use function
+		
+		
+		//delete the item
 		itemsFactory.deleteItemInInventory(itemIndex);
 		$scope.items.splice(itemIndex, 1);
 	};
