@@ -72,6 +72,21 @@ function($stateProvider, $urlRouterProvider) {
 		}
 	});
 	
+	$stateProvider.state('inventory', {
+		url: '/inventory',
+		views: {
+			'@': {
+				templateUrl: 'app/views/pages/inventory/inventory.html',
+				controller: 'InventoryCtrl as InventoryCtrl',
+				resolve: {
+					inventoryItems: ['itemsFactory', function(itemsFactory) {
+						return itemsFactory.getInventory();
+					}]
+				}
+			}
+		}
+	});
+	
 	// +-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+
 	// +-=-+-=-+-=-+-=-+ GAME! +-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+
 	//{+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+-=-+

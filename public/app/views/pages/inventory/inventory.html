@@ -1,0 +1,32 @@
+<div>
+	Welcome To Your Inventory
+	
+	<form ng-submit="">
+		<div>
+			<input id="search-input" type="text" ng-model="searchText"></input>
+			<button class="btn" type="submit">Search</button>
+		</div>
+	</form>
+	
+	<div class="container">
+		<div class="row">
+			<div class="col-xs-1">
+
+				Items
+				
+				<table class="shopTable" style="border-spacing:10px;">
+					<tr ng-repeat="itemName in items track by $index">
+						<td>
+							{{itemName}}
+						</td>
+						<td>
+							<button ng-click="useItem($index)">Use</button>
+						</td>
+					</tr>
+				</table>
+				
+			</div>
+		</div>
+	</div>
+	
+</div>

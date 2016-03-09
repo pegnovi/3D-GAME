@@ -9,7 +9,7 @@ app.factory('roomsFactory', ['$http', 'auth', function($http, auth) {
 	};
 	obj.unsetChosenRoomID = function() {
 		obj.chosenRoomID = -1;
-	}
+	};
 	obj.getAllRooms = function() {
 		return $http.get('/rooms').success(function(data) {
 			angular.copy(data, obj.rooms);

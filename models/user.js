@@ -12,7 +12,9 @@ var UserSchema = new Schema({
 	username: {type: String, unique: true},
 	email: {type: String, unique: true},
 	hash: String,
-	salt: String
+	salt: String,
+	compartment: {type: mongoose.Schema.Types.ObjectId, ref: 'Compartment'},
+	inventory: [String]
 });
 
 UserSchema.methods.setPassword = function(password) {

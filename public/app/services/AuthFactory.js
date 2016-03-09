@@ -24,7 +24,7 @@ app.factory('auth', ['$http', '$window', '$cookies', function($http, $window, $c
 		if(token) {
 			var payload = JSON.parse($window.atob(token.split('.')[1]));
 			
-			console.log("returning " + (payload.exp > Date.now() / 1000));
+			//console.log("returning " + (payload.exp > Date.now() / 1000));
 			return payload.exp > Date.now() / 1000;
 		}
 		

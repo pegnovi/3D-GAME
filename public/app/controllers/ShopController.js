@@ -1,14 +1,14 @@
 
 
-app.controller('ShopCtrl', ['$scope', '$state', 'shopFactory',
-function($scope, $state, shopFactory) {
+app.controller('ShopCtrl', ['$scope', '$state', 'itemsFactory',
+function($scope, $state, itemsFactory) {
 	
 	logger.log("In Shop Controller");
 	
 	// === ShopController vars === 
 	$scope.searchText = "";
-	$scope.shopItems = shopFactory.shopItems;
-	$scope.cart = shopFactory.cart;
+	$scope.shopItems = itemsFactory.shopItems;
+	$scope.cart = itemsFactory.cart;
 
 	// === ShopController functions ===
 	$scope.addToCart = function(itemName) {
@@ -22,10 +22,8 @@ function($scope, $state, shopFactory) {
 	$scope.removeFromCart = function(itemName) {
 		delete $scope.cart[itemName];
 	};
-	$scope.emptyCart = shopFactory.emptyCart;
-	$scope.getShopItem = function(itemName) {
-		return $scope.shopItems[itemName];
-	};
+	$scope.emptyCart = itemsFactory.emptyCart;
+	$scope.getShopItem = itemsFactory.getShopItem;
 	$scope.goToCart = function() {
 		$state.transitionTo('shop.cart');
 	};
@@ -36,8 +34,29 @@ function($scope, $state, shopFactory) {
 		}
 		return totalAmountToPay;
 	};
+	$scope.unwrapCart = function() {
+		var unwrappedCart = [];
+		for(var itemName in $scope.cart) {
+			if($scope.cart.hasOwnProperty(itemName)) {
+				for(var i=0; i<$scope.cart[itemName]; i++) {
+					unwrappedCart.push(itemName);
+				}
+			}
+		}
+		return unwrappedCart;
+	};
 	$scope.buy = function() {
 		logger.log("Buy!");
+		//update user db
+		itemsFactory.addItemsToInventory($scope.unwrapCart()).success(function(data) {
+			//empty cart
+			$scope.emptyCart();
+			
+			//transition back to store
+			$state.transitionTo('shop');
+		});
+		
+		
 	};
 	
 }]);

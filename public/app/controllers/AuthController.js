@@ -28,6 +28,7 @@ app.controller('AuthCtrl', ['$scope', '$state', 'auth', function($scope, $state,
 	};
 	$scope.logOut = function() {
 		auth.logOut();
+		$state.go('home');
 		$scope.loginMode = true;
 	}
 	
